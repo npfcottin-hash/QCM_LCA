@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QCM LCA — Études Analytiques</title>
+<style>
+  /* Calibré pour dalle E-ink 300 ppp (Boox Note Go 10.3) */
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #000000;
+    background-color: #ffffff;
+    margin: 0;
+    /* Marges latérales sécurisées pour éviter le contact avec les bords de l'écran */
+    padding: 24px 20px 60px 20px;
+    line-height: 1.5;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* En-tête */
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #000000;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+
+  .badge {
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    border: 2px solid #000000;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .progress-num {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 0 0 12px 0;
+  }
+
+  .question-text {
+    font-size: 1.05rem;
+    margin-bottom: 22px;
+  }
+
+  /* Options tactiles cochables */
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .option-row {
+    display: flex;
+    align-items: flex-start;
+    border: 2px solid #000000;
+    border-radius: 6px;
+    padding: 14px 16px;
+    background-color: #ffffff;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Vraie case à cocher tactile grand format */
+  .checkbox-input {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 28px;
+    height: 28px;
+    border: 2px solid #000000;
+    border-radius: 4px;
+    margin-right: 14px;
+    margin-top: 1px;
+    flex-shrink: 0;
+    display: grid;
+    place-content: center;
+    background-color: #ffffff;
+    cursor: pointer;
+  }
+
+  .checkbox-input:checked {
+    background-color: #000000;
+  }
+
+  .checkbox-input:checked::before {
+    content: "✓";
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .option-content {
+    font-size: 1rem;
+    flex-grow: 1;
+  }
+
+  /* États après validation */
+  .option-row.is-correct {
+    border: 3px solid #000000;
+    background-color: #f0f0f0;
+  }
+
+  .option-row.is-wrong-picked {
+    text-decoration: line-through;
+    background-color: #ffffff;
+  }
+
+  .status-tag {
+    font-size: 0.8rem;
+    font-weight: 900;
+    margin-left: 8px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  .tag-vrai {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  .tag-faux {
+    border: 1px solid #000000;
+    background-color: #ffffff;
+    color: #000000;
+  }
+
+  /* Bouton d'action principal */
+  .btn-action {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
+    background-color: #000000;
+    border: 2px solid #000000;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .btn-action:active {
+    background-color: #333333;
+  }
+
+  /* Bloc de correction immédiate */
+  .correction-card {
+    display: none;
+    margin-top: 24px;
+    border-top: 2px dashed #000000;
+    padding-top: 20px;
+  }
+
+  .verdict-banner {
+    border: 2px solid #000000;
+    background-color: #f0f0f0;
+    padding: 10px 14px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    border-radius: 4px;
+  }
+
+  .explanation-item {
+    font-size: 0.95rem;
+    margin: 10px 0;
+    padding-left: 12px;
+    border-left: 3px solid #000000;
+  }
+
+  /* Écran final de note */
+  .result-box {
+    display: none;
+    border: 2px solid #000000;
+    border-radius: 8px;
+    padding: 30px 20px;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .final-score {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin: 15px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header-bar" id="headerBar">
+    <span class="badge" id="badgeCategory">Notionnelle</span>
+    <span class="progress-num" id="progressText">Question 1 / 6</span>
+  </div>
+
+  <div id="quizArea">
+    <h2 id="qTitle">Titre</h2>
+    <p class="question-text" id="qText">Énoncé...</p>
+
+    <div class="options-list" id="optionsList"></div>
+
+    <button class="btn-action" id="btnSubmit">Valider et voir la correction</button>
+
+    <div class="correction-card" id="correctionBlock">
+      <div class="verdict-banner" id="verdictBanner"></div>
+      <div id="explanationsList"></div>
+      <button class="btn-action" id="btnNext" style="margin-top: 22px;">Passer à la question suivante &rarr;</button>
+    </div>
+  </div>
+
+  <div class="result-box" id="resultBlock">
+    <div class="badge">Bilan de l'évaluation</div>
+    <div class="final-score" id="scoreDisplay">0 / 6</div>
+    <p id="scoreComment" style="font-size: 1.1rem; margin-bottom: 25px;"></p>
+    <button class="btn-action" id="btnRestart">&#8635; Recommencer le test</button>
+  </div>
+</div>
+
+<script>
+const quizData = [
+  {
+    category: "Notionnelle brute",
+    title: "1. Classification et validité interne des études",
+    text: "Concernant la classification générale des études épidémiologiques et leur validité interne, quelle(s) est/sont la/les proposition(s) exacte(s) ?",
+    options: [
+      { id: "A", text: "Une étude analytique se distingue d'une étude descriptive par le fait qu'elle vise formellement à mesurer une association ou un lien de causalité entre une exposition et un critère de jugement.", correct: true },
+      { id: "B", text: "Une étude de cohorte prospective permet d'éliminer tout risque de facteur de confusion résiduel dès lors que la taille de l'échantillon inclus est statistiquement suffisante.", correct: false },
+      { id: "C", text: "Les études observationnelles analytiques n'impliquent aucune intervention thérapeutique ou diagnostique imposée par l'investigateur.", correct: true },
+      { id: "D", text: "Contrairement aux essais randomisés, une étude observationnelle ne permet jamais d'établir une causalité indiscutable en raison de facteurs de confusion potentiellement inconnus ou non mesurés.", correct: true },
+      { id: "E", text: "L'étude transversale et l'étude cas-témoins font partie intégrante des études observationnelles analytiques.", correct: true }
+    ],
+    explanations: {
+      A: "VRAI : Les études descriptives quantifient des fréquences sans hypothèse ; les analytiques comparent des groupes pour tester une association.",
+      B: "FAUX : L'effectif réduit l'erreur aléatoire, pas le biais de confusion. Sans randomisation, le risque de confusion résiduelle persiste toujours.",
+      C: "VRAI : L'investigateur subit l'exposition naturelle des sujets sans intervenir.",
+      D: "VRAI : Risque permanent de facteurs de confusion inconnus ou non mesurés en vie réelle.",
+      E: "VRAI : Les 3 schémas d'observation analytique sont la cohorte, le cas-témoins et l'étude transversale."
+    }
+  },
+  {
+    category: "Cas pratique LCA",
+    title: "2. Évaluation d'une exposition professionnelle",
+    text: "Des épidémiologistes étudient la toxicité respiratoire d'un solvant volatil. Ils suivent 1 500 techniciens exposés et 3 000 non exposés, strictement sains à l'inclusion, pendant 10 ans pour détecter l'apparition de BPCO. Quelle(s) est/sont la/les proposition(s) exacte(s) ?",
+    options: [
+      { id: "A", text: "Le devis méthodologique correspond à une étude de cohorte prospective.", correct: true },
+      { id: "B", text: "Ce design permet de mesurer directement l'incidence de la BPCO dans chaque groupe.", correct: true },
+      { id: "C", text: "La mesure d'association de référence à calculer est le Risque Relatif (RR).", correct: true },
+      { id: "D", text: "Le biais méthodologique majeur à redouter au cours de ce suivi de 10 ans est le biais de mémorisation.", correct: false },
+      { id: "E", text: "Si la BPCO était une affection très rare (2 cas / 1 000 000 / an), ce schéma demeurerait le plus économique et rapide.", correct: false }
+    ],
+    explanations: {
+      A: "VRAI : Sujets classés selon leur statut d'exposition (Exposés vs Non-Exposés) puis suivis dans le temps vers l'événement.",
+      B: "VRAI : Le suivi d'une population à risque permet de mesurer directement de nouveaux cas par unité de temps (incidence).",
+      C: "VRAI : Le Risque Relatif (Incidence exposés / Incidence non-exposés) est la mesure clé de la cohorte.",
+      D: "FAUX : L'exposition étant mesurée au départ, il n'y a aucun biais de rappel. La menace majeure est l'attrition (perdus de vue).",
+      E: "FAUX : Une cohorte est inadaptée aux maladies rares car elle nécessiterait des effectifs démesurés pour observer quelques cas."
+    }
+  },
+  {
+    category: "Notionnelle brute",
+    title: "3. Méthodologie de l'étude cas-témoins",
+    text: "Concernant la méthodologie de l'étude cas-témoins et l'exploitation de ses résultats, quelle(s) est/sont la/les proposition(s) exacte(s) ?",
+    options: [
+      { id: "A", text: "La constitution des groupes repose initialement sur la présence ou l'absence de la maladie d'intérêt.", correct: true },
+      { id: "B", text: "L'investigateur peut y mesurer directement des taux d'incidence de la maladie chez les sujets exposés.", correct: false },
+      { id: "C", text: "L'Odds Ratio (OR) obtenu approxime fidèlement le Risque Relatif si la prévalence de la maladie est inférieure à 10 %.", correct: true },
+      { id: "D", text: "L'appariement des témoins sur les cas permet de neutraliser des facteurs de confusion identifiés.", correct: true },
+      { id: "E", text: "Ce design est particulièrement approprié pour évaluer simultanément les effets cliniques d'une exposition rare.", correct: false }
+    ],
+    explanations: {
+      A: "VRAI : Point de départ = statut de santé (Cas vs Témoins), puis reconstitution rétrospective des expositions passées.",
+      B: "FAUX : L'investigateur fixant lui-même le ratio cas/témoins, l'incidence réelle et le Risque Relatif sont impossibles à calculer.",
+      C: "VRAI : Hypothèse de la maladie rare : l'OR converge vers le RR si la prévalence de la maladie est inférieure à 10 %.",
+      D: "VRAI : L'appariement force un équilibre identique pour les facteurs connus (âge, sexe) entre cas et témoins.",
+      E: "FAUX : Inadapté aux expositions rares (on ne trouverait presque aucun exposé chez les témoins). C'est la cohorte qui convient."
+    }
+  },
+  {
+    category: "Cas pratique LCA",
+    title: "4. Pharmacovigilance et malformations",
+    text: "Pour explorer une cardiopathie néonatale rarissime (5 cas / 100 000 naissances) suspectée d'être liée à un médicament du 1er trimestre, on compare 40 nouveau-nés atteints à 120 sains de la même maternité en interrogeant leurs mères sur leur passé obstétrical. Quelle(s) est/sont la/les proposition(s) exacte(s) ?",
+    options: [
+      { id: "A", text: "Le devis méthodologique correspond à une étude cas-témoins rétrospective.", correct: true },
+      { id: "B", text: "Ce choix est optimal face à la rareté de l'événement et au délai de latence.", correct: true },
+      { id: "C", text: "Ce protocole est exposé à un risque important de biais de mémorisation.", correct: true },
+      { id: "D", text: "Sélectionner les témoins dans la même maternité limite le biais de sélection.", correct: true },
+      { id: "E", text: "L'étude permet de chiffrer la réduction absolue du risque chez les mères non exposées.", correct: false }
+    ],
+    explanations: {
+      A: "VRAI : Sélection sur la maladie (40 cas / 120 témoins) puis recueil a posteriori de l'exposition.",
+      B: "VRAI : Schéma d'élection pour les pathologies exceptionnelles évitant de suivre des cohortes gigantesques.",
+      C: "VRAI : Les mères d'enfants malades cherchent une cause et se remémorent leurs prises avec plus d'acuité.",
+      D: "VRAI : Garantit que les témoins proviennent de la même population source que les cas.",
+      E: "FAUX : Les indicateurs absolus nécessitent des taux d'incidence réels, inaccessibles en cas-témoins."
+    }
+  },
+  {
+    category: "Cas pratique LCA",
+    title: "5. Enquête épidémiologique transversale",
+    text: "Une enquête auprès de 4 000 adultes évalue simultanément, par auto-questionnaire unique, la sédentarité et la présence d'une lombalgie chronique. Les sédentaires ont une cote de lombalgie significativement augmentée (OR = 2,1). Quelle(s) est/sont la/les déduction(s) exacte(s) ?",
+    options: [
+      { id: "A", text: "Il s'agit d'une étude transversale (cross-sectional).", correct: true },
+      { id: "B", text: "L'association prouve formellement que la sédentarité est la cause directe de la lombalgie.", correct: false },
+      { id: "C", text: "Cette étude est sujette au biais de causalité inverse.", correct: true },
+      { id: "D", text: "Le biais d'attrition lié aux perdus de vue menace l'interprétation des résultats.", correct: false },
+      { id: "E", text: "Ce type de devis est performant pour mesurer des prévalences et générer de nouvelles hypothèses.", correct: true }
+    ],
+    explanations: {
+      A: "VRAI : Mesure instantanée et simultanée de l'exposition et de la maladie à un instant T.",
+      B: "FAUX : L'absence d'antériorité temporelle démontrée interdit d'affirmer un lien de causalité.",
+      C: "VRAI : Causalité inverse : impossible de déterminer si la sédentarité provoque la douleur ou si la lombalgie a poussé les sujets à cesser le sport.",
+      D: "FAUX : Le biais d'attrition ne concerne que les études de suivi (cohortes). En transversal, il n'y a pas de suivi donc pas de perdus de vue.",
+      E: "VRAI : Rôle clé des études transversales : état des lieux de santé publique et formulation d'hypothèses."
+    }
+  },
+  {
+    category: "Synthèse comparative",
+    title: "6. Arbitrage méthodologique global",
+    text: "En vous fondant sur les critères méthodologiques distinctifs des études observationnelles, quelle(s) est/sont la/les proposition(s) exacte(s) ?",
+    options: [
+      { id: "A", text: "Pour explorer l'étiologie d'un mésothéliome pleural (cancer rare, latence > 30 ans), le cas-témoins est le schéma le plus efficient.", correct: true },
+      { id: "B", text: "Une étude de cohorte peut être historique si les données sont extraites de registres passés, dès lors que l'enquête va de l'exposition vers la maladie.", correct: true },
+      { id: "C", text: "L'étude de cohorte prospective élimine à la fois le biais de mémorisation et le biais de sélection lié aux témoins.", correct: true },
+      { id: "D", text: "Dans une étude transversale, la mesure d'association calculée est le Risque Relatif d'incidence.", correct: false },
+      { id: "E", text: "Pour évaluer une intoxication accidentelle touchant 350 riverains d'une usine (exposition rare), le cas-témoins est le design prioritaire.", correct: false }
+    ],
+    explanations: {
+      A: "VRAI : Maladie rare + délai de latence prolongé = indication reine de l'étude cas-témoins.",
+      B: "VRAI : Ce qui définit la cohorte est le sens logique de la démarche (Exposition -> Maladie), peu importe si les données sont issues d'archives médicales.",
+      C: "VRAI : Exposition mesurée avant l'apparition de la maladie (zéro biais de rappel) et pas de sélection artificielle de témoins sains.",
+      D: "FAUX : Mesurant des cas existants à un instant T (prévalence), elle ne fournit qu'un OR ou RR de prévalence.",
+      E: "FAUX : Face à une exposition rare, on privilégie impérativement la cohorte en suivant le groupe exposé identifié."
+    }
+  }
+];
+
+let currentIndex = 0;
+let userScore = 0;
+
+const badgeCategory = document.getElementById("badgeCategory");
+const progressText = document.getElementById("progressText");
+const qTitle = document.getElementById("qTitle");
+const qText = document.getElementById("qText");
+const optionsList = document.getElementById("optionsList");
+const btnSubmit = document.getElementById("btnSubmit");
+const correctionBlock = document.getElementById("correctionBlock");
+const verdictBanner = document.getElementById("verdictBanner");
+const explanationsList = document.getElementById("explanationsList");
+const btnNext = document.getElementById("btnNext");
+const quizArea = document.getElementById("quizArea");
+const resultBlock = document.getElementById("resultBlock");
+const scoreDisplay = document.getElementById("scoreDisplay");
+const scoreComment = document.getElementById("scoreComment");
+const btnRestart = document.getElementById("btnRestart");
+
+function renderQuestion(index) {
+  const current = quizData[index];
+  badgeCategory.textContent = current.category;
+  progressText.textContent = `Question ${index + 1} / ${quizData.length}`;
+  qTitle.textContent = current.title;
+  qText.textContent = current.text;
+
+  optionsList.innerHTML = "";
+  correctionBlock.style.display = "none";
+  btnSubmit.style.display = "block";
+
+  current.options.forEach(opt => {
+    const label = document.createElement("label");
+    label.className = "option-row";
+    label.id = `row-${opt.id}`;
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "checkbox-input";
+    checkbox.value = opt.id;
+    checkbox.id = `check-${opt.id}`;
+
+    const textSpan = document.createElement("span");
+    textSpan.className = "option-content";
+    textSpan.innerHTML = `<strong>[ ${opt.id} ]</strong> ${opt.text}`;
+
+    label.appendChild(checkbox);
+    label.appendChild(textSpan);
+    optionsList.appendChild(label);
+  });
+}
+
+btnSubmit.addEventListener("click", () => {
+  const current = quizData[currentIndex];
+  const checkedBoxes = Array.from(optionsList.querySelectorAll(".checkbox-input:checked"));
+  const selectedIds = checkedBoxes.map(cb => cb.value);
+
+  let isPerfect = true;
+  const correctLetters = [];
+
+  current.options.forEach(opt => {
+    const row = document.getElementById(`row-${opt.id}`);
+    const input = document.getElementById(`check-${opt.id}`);
+    input.disabled = true;
+
+    if (opt.correct) {
+      correctLetters.push(opt.id);
+      row.classList.add("is-correct");
+      row.querySelector(".option-content").innerHTML += ` <span class="status-tag tag-vrai">EXACT</span>`;
+      if (!selectedIds.includes(opt.id)) {
+        isPerfect = false;
+      }
+    } else {
+      if (selectedIds.includes(opt.id)) {
+        row.classList.add("is-wrong-picked");
+        row.querySelector(".option-content").innerHTML += ` <span class="status-tag tag-faux">FAUX</span>`;
+        isPerfect = false;
+      }
+    }
+  });
+
+  if (isPerfect) {
+    userScore++;
+    verdictBanner.textContent = `Excellent ! Réponse exacte : ${correctLetters.join(", ")} (+1 point)`;
+  } else {
+    verdictBanner.textContent = `Incorrect ou incomplet. Réponses exactes : ${correctLetters.join(", ")}`;
+  }
+
+  explanationsList.innerHTML = "";
+  current.options.forEach(opt => {
+    const expDiv = document.createElement("div");
+    expDiv.className = "explanation-item";
+    expDiv.textContent = current.explanations[opt.id];
+    explanationsList.appendChild(expDiv);
+  });
+
+  btnSubmit.style.display = "none";
+  correctionBlock.style.display = "block";
+
+  if (currentIndex === quizData.length - 1) {
+    btnNext.textContent = "Consulter ma note finale &rarr;";
+  } else {
+    btnNext.textContent = "Passer à la question suivante &rarr;";
+  }
+});
+
+btnNext.addEventListener("click", () => {
+  currentIndex++;
+  if (currentIndex < quizData.length) {
+    renderQuestion(currentIndex);
+    window.scrollTo(0, 0);
+  } else {
+    showFinalScore();
+  }
+});
+
+function showFinalScore() {
+  quizArea.style.display = "none";
+  badgeCategory.textContent = "Bilan";
+  progressText.textContent = "Terminé";
+  resultBlock.style.display = "block";
+  scoreDisplay.textContent = `${userScore} / ${quizData.length}`;
+
+  const pct = Math.round((userScore / quizData.length) * 100);
+  if (pct === 100) {
+    scoreComment.textContent = "Score parfait (100 %) ! Notions et pièges de LCA maîtrisés.";
+  } else if (pct >= 66) {
+    scoreComment.textContent = `Solide résultat (${pct} %). Revois les quelques subtilités sur les biais.`;
+  } else {
+    scoreComment.textContent = `Score de ${pct} %. Relis attentivement les mécanismes méthodologiques.`;
+  }
+}
+
+btnRestart.addEventListener("click", () => {
+  currentIndex = 0;
+  userScore = 0;
+  resultBlock.style.display = "none";
+  quizArea.style.display = "block";
+  renderQuestion(0);
+  window.scrollTo(0, 0);
+});
+
+// Lancement initial
+renderQuestion(0);
+</script>
+</body>
+</html>
