@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz LCA - Le Score de Propension</title>
+<style>
+  /* ==========================================================================
+     OPTIMISATION STRICTE E-INK (ONYX BOOX GO 10.3 GEN 2)
+     - Noir et blanc 100% pur (#000 et #FFF)
+     - Désactivation totale de toutes les animations et transitions
+     - Écran unique sans défilement vertical obligatoire (hauteur 100% optimisée)
+     - Cibles tactiles larges (compatibles doigt et stylet)
+     ========================================================================== */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+    color: #000000;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .screen-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 10px 14px;
+    min-height: 98vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Header compact */
+  header {
+    border-bottom: 2px solid #000000;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .badge-device {
+    border: 1px solid #000000;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .header-score {
+    font-size: 13px;
+    font-weight: 800;
+    border: 1px solid #000000;
+    background-color: #000000;
+    color: #ffffff;
+    padding: 2px 8px;
+  }
+
+  .header-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  h1 {
+    font-size: 17px;
+    font-weight: 900;
+    margin: 0;
+  }
+
+  .q-progress-text {
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  /* Stepper horizontal */
+  .stepper-bar {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .step-dot {
+    flex: 1;
+    height: 6px;
+    border: 1px solid #000000;
+    background-color: #ffffff;
+  }
+
+  .step-dot.active {
+    background-color: #000000;
+  }
+
+  .step-dot.completed {
+    background-color: #888888;
+  }
+
+  /* Corps de la question */
+  .question-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .q-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    border-bottom: 1px dashed #000000;
+    padding-bottom: 3px;
+  }
+
+  .q-scenario {
+    background-color: #f2f2f2;
+    border-left: 3px solid #000000;
+    padding: 6px 10px;
+    font-size: 13px;
+    margin-bottom: 6px;
+    font-style: italic;
+  }
+
+  .q-statement {
+    font-size: 14.5px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  /* 5 propositions (A, B, C, D, E) */
+  .propositions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .prop-label {
+    border: 1px solid #000000;
+    padding: 7px 10px;
+    cursor: pointer;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    min-height: 42px;
+  }
+
+  .prop-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .prop-checkbox {
+    margin-top: 2px;
+    transform: scale(1.35);
+    cursor: pointer;
+    accent-color: #000000;
+  }
+
+  .prop-letter {
+    font-weight: 900;
+    font-size: 14px;
+    min-width: 22px;
+  }
+
+  .prop-text {
+    flex: 1;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /* Justification post-validation */
+  .prop-justif {
+    display: none;
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px dashed #000000;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  .pill-status {
+    display: inline-block;
+    padding: 1px 5px;
+    font-size: 10.5px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-right: 5px;
+    border: 1px solid #000000;
+  }
+
+  .pill-status.vrai {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  .pill-status.faux {
+    background-color: #ffffff;
+    color: #000000;
+  }
+
+  .prop-label.correct-checked {
+    border: 2px solid #000000;
+    background-color: #efefef;
+  }
+
+  .prop-label.wrong-checked {
+    border: 2px dashed #000000;
+    background-color: #ffffff;
+  }
+
+  .prop-label.missed-true {
+    border: 2px solid #000000;
+    background-color: #f7f7f7;
+  }
+
+  /* Boîte de correction immédiate */
+  .feedback-box {
+    display: none;
+    border: 2px solid #000000;
+    padding: 8px 10px;
+    background-color: #ffffff;
+    margin-top: 4px;
+  }
+
+  .feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 900;
+    font-size: 13.5px;
+    border-bottom: 1px solid #000000;
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+  }
+
+  .feedback-pts {
+    font-size: 13.5px;
+    font-weight: 900;
+    border: 1px solid #000000;
+    padding: 1px 6px;
+  }
+
+  .feedback-detail {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Barre d'action fixe en bas */
+  .action-container {
+    border-top: 2px solid #000000;
+    padding-top: 8px;
+    margin-top: 6px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    border: 2px solid #000000;
+    padding: 11px 16px;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    cursor: pointer;
+    min-height: 46px;
+    flex: 1;
+    text-align: center;
+  }
+
+  .btn-black {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  .btn-white {
+    background-color: #ffffff;
+    color: #000000;
+  }
+
+  .btn:active {
+    outline: 2px solid #000000;
+  }
+
+  /* Écran de résultat final */
+  #final-screen {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .final-card {
+    border: 3px solid #000000;
+    padding: 14px;
+    text-align: center;
+    background-color: #ffffff;
+  }
+
+  .final-label {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .final-note {
+    font-size: 42px;
+    font-weight: 900;
+    margin: 2px 0;
+  }
+
+  .final-apprec {
+    font-size: 13.5px;
+    font-weight: 700;
+    border-top: 1px dashed #000000;
+    padding-top: 6px;
+  }
+
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid #000000;
+    font-size: 12px;
+  }
+
+  .results-table th, .results-table td {
+    border: 1px solid #000000;
+    padding: 5px 7px;
+    text-align: left;
+  }
+
+  .results-table th {
+    background-color: #000000;
+    color: #ffffff;
+    font-weight: 800;
+  }
+
+  .results-table td.center {
+    text-align: center;
+    font-weight: 800;
+  }
+</style>
+</head>
+<body>
+
+<div class="screen-container">
+  <!-- En-tête -->
+  <header>
+    <div class="header-top">
+      <span class="badge-device">Onyx Boox Go 10.3 Gen 2 • E-Ink Carta</span>
+      <span class="header-score" id="score-badge">Note : 0.0 / 20</span>
+    </div>
+    <div class="header-title-row">
+      <h1>LCA : Le Score de Propension</h1>
+      <span class="q-progress-text" id="q-counter">Question 1 / 10</span>
+    </div>
+    <div class="stepper-bar" id="stepper"></div>
+  </header>
+
+  <!-- Écran de question interactive -->
+  <div class="question-body" id="question-screen">
+    <div class="q-meta">
+      <span id="theme-label">Thème</span>
+      <span>QCM (1 à 5 réponses exactes) • Barème EDN / 2 pts</span>
+    </div>
+
+    <div class="q-scenario" id="scenario-box"></div>
+    <div class="q-statement" id="statement-box"></div>
+
+    <div class="propositions-list" id="propositions-box"></div>
+
+    <!-- Boîte de correction immédiate -->
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-header">
+        <span id="feedback-status">Statut de la réponse</span>
+        <span class="feedback-pts" id="feedback-score">Note : 0 / 2 pts</span>
+      </div>
+      <div class="feedback-detail" id="feedback-detail"></div>
+    </div>
+  </div>
+
+  <!-- Écran de synthèse final avec note sur 20 -->
+  <div id="final-screen">
+    <div class="final-card">
+      <div class="final-label">Note Finale d'Épreuve de LCA (Concours)</div>
+      <div class="final-note" id="final-score-val">-- / 20</div>
+      <div class="final-apprec" id="final-apprec-text"></div>
+    </div>
+
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>N°</th>
+          <th>Thématique</th>
+          <th style="text-align:center;">Vos Réps.</th>
+          <th style="text-align:center;">Attendu</th>
+          <th style="text-align:center;">Note / 2</th>
+        </tr>
+      </thead>
+      <tbody id="summary-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Barre de commande fixe en bas -->
+  <div class="action-container">
+    <button type="button" class="btn btn-black" id="action-btn" onclick="gererAction()">Valider cette question</button>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   DONNÉES DU QUIZ BASÉES EXCLUSIVEMENT SUR LA SOURCE FOURNIE
+   10 Questions • 5 Propositions par question (A à E) • 1 à 5 vraies
+   Barème officiel docimologique EDN / LCA :
+   - 0 discordance : 2.0 / 2
+   - 1 discordance : 1.0 / 2
+   - 2 discordances : 0.4 / 2
+   - >= 3 discordances : 0.0 / 2
+   Total = 20 points
+   ========================================================================== */
+const questions = [
+  {
+    id: 1,
+    theme: "Section 1 : Biais d'Indication & Risque Structurel",
+    scenario: "Mise en situation : Dans une cohorte observationnelle analytique évaluant un nouveau traitement médical, les patients traités présentent une sévérité initiale plus marquée que les non-traités.",
+    statement: "Concernant le biais d'indication et ses caractéristiques méthodologiques, quelles sont les propositions exactes ?",
+    props: [
+      {
+        letter: "A",
+        text: "Le biais d'indication s'apparente à la fois à un biais de sélection lors de la constitution des groupes et à un biais de confusion lors de l'analyse.",
+        isCorrect: true,
+        justif: "Exact (Section 1). Cette différence systématique initiale constitue le biais d'indication, combinant sélection à l'inclusion et confusion lors de l'analyse."
+      },
+      {
+        letter: "B",
+        text: "Dans les études observationnelles analytiques, les sujets exposés à un traitement présentent par nature des caractéristiques initiales identiques aux sujets non exposés.",
+        isCorrect: false,
+        justif: "Faux (Section 1). Les sujets exposés présentent par nature des caractéristiques initiales DIFFÉRENTES des sujets non exposés."
+      },
+      {
+        letter: "C",
+        text: "Les médecins ne prescrivent pas un traitement au hasard, mais en fonction du profil clinique, des comorbidités et des facteurs de risque de leurs patients.",
+        isCorrect: true,
+        justif: "Exact (Section 1). La prescription médicale dépend directement de l'état clinique et des facteurs de risque."
+      },
+      {
+        letter: "D",
+        text: "Les consommateurs du traitement actif sont structurellement à plus haut risque d'événements que les non-consommateurs.",
+        isCorrect: true,
+        justif: "Exact (Section 1). En recevant le traitement en raison de leur profil plus à risque, les consommateurs sont structurellement plus à risque d'événements."
+      },
+      {
+        letter: "E",
+        text: "Le biais d'indication est un biais d'attrition lié aux perdus de vue pendant la phase de suivi.",
+        isCorrect: false,
+        justif: "Faux (Section 1). C'est un biais de sélection et de confusion lié aux caractéristiques initiales à l'inclusion, et non un biais d'attrition."
+      }
+    ]
+  },
+  {
+    id: 2,
+    theme: "Section 1 : Exemple Clinique (Statines & Infarctus)",
+    scenario: "Exemple clinique du cours : Étude observationnelle évaluant l'association entre statines et infarctus du myocarde (IDM) à 10 ans chez 200 patients (100 exposés, 100 non-exposés). Le groupe sous statines présente un taux d'IDM significativement supérieur (p < 0,05).",
+    statement: "Concernant ce résultat brut et son analyse méthodologique en LCA, quelles sont les propositions exactes ?",
+    props: [
+      {
+        letter: "A",
+        text: "Conclure sur cette seule analyse brute que les statines augmentent le risque d'infarctus constitue une interprétation erronée.",
+        isCorrect: true,
+        justif: "Exact (Section 1). C'est précisément l'interprétation erronée classique liée à l'absence de prise en compte du biais d'indication."
+      },
+      {
+        letter: "B",
+        text: "Les patients qui reçoivent des statines présentent des facteurs de risque cardiovasculaires sous-jacents (HTA, diabète, dyslipidémie, tabagisme, hérédité...) ayant précisément motivé la prescription par leur clinicien.",
+        isCorrect: true,
+        justif: "Exact (Section 1). Ce sont ces facteurs cardiovasculaires initiaux qui ont justifié l'ordonnance."
+      },
+      {
+        letter: "C",
+        text: "Ces caractéristiques initiales étant elles-mêmes de puissants facteurs de risque d'IDM, il est logique d'observer une survenue accrue d'IDM dans ce groupe.",
+        isCorrect: true,
+        justif: "Exact (Section 1). Le risque accru d'infarctus est directement lié au profil pathologique des patients traités."
+      },
+      {
+        letter: "D",
+        text: "L'analyse brute de cette étude observationnelle est totalement biaisée.",
+        isCorrect: true,
+        justif: "Exact (Section 1). L'analyse non ajustée sur le profil de prescription est totalement biaisée."
+      },
+      {
+        letter: "E",
+        text: "Le seuil p < 0,05 garantit formellement la causalité entre la consommation de statines et la survenue d'IDM.",
+        isCorrect: false,
+        justif: "Faux (Section 1). La significativité statistique p < 0,05 ne protège en rien contre le biais d'indication."
+      }
+    ]
+  },
+  {
+    id: 3,
+    theme: "Section 2 : Définition et Propriétés du Score",
+    scenario: "Mise en situation : Les investigateurs souhaitent synthétiser le profil de prescription de chaque patient au moyen d'un score de propension.",
+    statement: "Concernant la définition et les propriétés fondamentales du score de propension, quelles sont les propositions exactes ?",
+    props: [
+      {
+        letter: "A",
+        text: "Il est défini comme la probabilité conditionnelle qu'a un patient de se voir prescrire ou d'être exposé au médicament d'intérêt, sachant l'ensemble de ses caractéristiques cliniques et démographiques initiales à l'inclusion.",
+        isCorrect: true,
+        justif: "Exact (Section 2). C'est la définition formelle et mot à mot du cours."
+      },
+      {
+        letter: "B",
+        text: "Ce score est une probabilité comprise entre 0 et 1 (0 % à 100 % de probabilité).",
+        isCorrect: true,
+        justif: "Exact (Section 2). Comme toute probabilité, sa valeur est strictement bornée entre 0 et 1."
+      },
+      {
+        letter: "C",
+        text: "Il mesure la probabilité conditionnelle de développer le critère de jugement clinique (ex : survenue d'une récidive).",
+        isCorrect: false,
+        justif: "Faux (Section 2). Il mesure la probabilité d'être EXPOSÉ au médicament, et non de subir l'événement clinique."
+      },
+      {
+        letter: "D",
+        text: "Il permet de synthétiser ou de résumer de multiples caractéristiques initiales complexes en une seule et unique variable quantitative.",
+        isCorrect: true,
+        justif: "Exact (Section 2). C'est l'objectif méthodologique central : réduire la multidimensionnalité en une variable unique."
+      },
+      {
+        letter: "E",
+        text: "Son calcul impose de connaître a priori l'observance thérapeutique du patient au cours du suivi.",
+        isCorrect: false,
+        justif: "Faux (Section 2). Il est calculé uniquement à partir des caractéristiques initiales mesurées à l'inclusion."
+      }
+    ]
+  },
+  {
+    id: 4,
+    theme: "Section 2 : Modélisation Statistique du Score",
+    scenario: "Extrait méthodologique : 'A propensity score was estimated for each patient using a multivariable regression model.'",
+    statement: "Concernant la modélisation statistique du score de propension selon le cours, quelles sont les propositions exactes ?",
+    props: [
+      {
+        letter: "A",
+        text: "Le score de propension est généralement modélisé via une régression logistique multivariée.",
+        isCorrect: true,
+        justif: "Exact (Section 2). La régression logistique multivariée est l'approche statistique standard citée dans le texte."
+      },
+      {
+        letter: "B",
+        text: "Dans ce modèle, la variable à expliquer est l'administration effective du traitement (0 = non exposé, 1 = exposé).",
+        isCorrect: true,
+        justif: "Exact (Section 2). La variable dépendante à expliquer est binaire (0 = non exposé, 1 = exposé)."
+      },
+      {
+        letter: "C",
+        text: "Dans ce modèle, la variable à expliquer est le critère de jugement principal (0 = indemne, 1 = événement).",
+        isCorrect: false,
+        justif: "Faux (Section 2). Piège classique de LCA : le modèle du score modélise l'exposition, pas l'événement d'intérêt."
+      },
+      {
+        letter: "D",
+        text: "Les variables explicatives sont toutes les covariables initiales mesurées (comorbidités, âge, sexe, examens biologiques).",
+        isCorrect: true,
+        justif: "Exact (Section 2). Toutes les caractéristiques initiales mesurées servent de variables explicatives."
+      },
+      {
+        letter: "E",
+        text: "La régression logistique du score de propension remplace l'analyse multivariée finale du critère de jugement.",
+        isCorrect: false,
+        justif: "Faux (Sections 2 et 3). Le score sert à équilibrer ou ajuster, mais l'analyse du critère de jugement reste nécessaire."
+      }
+    ]
+  },
+  {
+    id: 5,
+    theme: "Section 2 : Application Pratique & Valeurs Numériques",
+    scenario: "Application clinique du cours : Le score de propension de l'Atorvastatine est calculé selon l'âge, sexe, HTA, dyslipidémie, diabète, tabagisme, hérédité. Mr X (65 ans, HTA, diabète) a un score de 0,6. Mme Y (70 ans, dyslipidémie) a un score de 0,7.",
+    statement: "Concernant l'interprétation exacte de ces données numériques, quelles sont les propositions exactes ?",
+    props: [
+      {
+        letter: "A",
+        text: "Mr X présente 60 % de probabilité d'avoir le traitement selon son profil clinique.",
+        isCorrect: true,
+        justif: "Exact (Section 2). Un score de 0,6 signifie textuellement 60 % de probabilité de recevoir le traitement selon son profil."
+      },
+      {
+        letter: "B",
+        text: "Mme Y présente 70 % de probabilité d'exposition selon son profil clinique.",
+        isCorrect: true,
+        justif: "Exact (Section 2). Un score de 0,7 correspond textuellement à 70 % de probabilité d'exposition."
+      },
+      {
+        letter: "C",
+        text: "Mr X a 60 % de risque d'infarctus à 10 ans et Mme Y a 70 % de risque d'infarctus selon son profil.",
+        isCorrect: false,
+        justif: "Faux (Section 2). Le score n'indique pas le risque d'infarctus, mais la probabilité de se voir prescrire le traitement."
+      },
+      {
+        letter: "D",
+        text: "Le traitement sera efficace chez 60 % des patients ayant le profil de Mr X.",
+        isCorrect: false,
+        justif: "Faux (Section 2). Le score de propension ne quantifie pas l'efficacité pharmacologique du médicament."
+      },
+      {
+        letter: "E",
+        text: "Le score a permis de résumer les comorbidités de chaque patient en une valeur quantitative unique.",
+        isCorrect: true,
+        justif: "Exact (Section 2). C'est la synthèse des multiples caractéristiques initiales en une seule variable."
+      }
+    ]
+  },
+  {
+    id: 6,
+    theme: "Section 3 : Méthode 1 - L'Appariement (Matching)",
+    scenario: "Mise en situation : Les investigateurs réalisent un appariement sur le score de propension pour équilibrer les groupes traités et non traités.",
+    statement: "Concernant le fonctionnement et l'impact méthodologique de l'appariement (*matching*), quelles sont les propositions exactes ?",
+    props: [
+      {
+        letter: "A",
+        text: "Pour chaque patient exposé (consommateur), l'algorithme sélectionne un patient non exposé (non-consommateur) présentant un score de propension identique ou extrêmement proche (*caliper*).",
+        isCorrect: true,
+        justif: "Exact (Section 3). C'est le principe clinique exact de l'algorithme d'appariement."
+      },
+      {
+        letter: "B",
+        text: "On exclut de l'analyse les patients non appariés.",
+        isCorrect: true,
+        justif: "Exact (Section 3). Les patients ne trouvant pas de vis-à-vis proche sont exclus de la cohorte appariée."
+      },
+      {
+        letter: "C",
+        text: "L'appariement permet d'obtenir à terme deux groupes parfaitement équilibrés et comparables (semblables sur toutes les caractéristiques rentrées dans le score) comme dans un essai randomisé.",
+        isCorrect: true,
+        justif: "Exact (Section 3). C'est l'impact méthodologique et l'avantage direct décrit dans le tableau."
+      },
+      {
+        letter: "D",
+        text: "L'appariement permet de conserver la totalité des effectifs de la cohorte initiale sans aucune perte de puissance.",
+        isCorrect: false,
+        justif: "Faux (Section 3). L'exclusion des patients non appariés réduit la taille de l'échantillon analysé."
+      },
+      {
+        letter: "E",
+        text: "Les patients sont appariés en fonction de la survenue ou non de l'événement clinique lors du suivi.",
+        isCorrect: false,
+        justif: "Faux (Section 3). L'appariement se fait strictement sur le score de propension initial, à l'aveugle du suivi."
+      }
+    ]
+  },
+  {
+    id: 7,
+    theme: "Section 3 : Méthode 2 - L'Ajustement Multivarié",
+    scenario: "Mise en situation : Pour éviter de perdre des patients non appariés, l'équipe statistique décide d'effectuer un ajustement multivarié.",
+    statement: "Concernant l'ajustement multivarié sur le score de propension, quelles sont les propositions exactes ?",
+    props: [
+      {
+        letter: "A",
+        text: "On introduit le score de propension sous forme de variable continue d'ajustement unique au sein du modèle statistique final.",
+        isCorrect: true,
+        justif: "Exact (Section 3). Le score est introduit comme variable d'ajustement unique dans le modèle d'évaluation."
+      },
+      {
+        letter: "B",
+        text: "Le modèle statistique final utilisé peut être une régression logistique ou un modèle de Cox.",
+        isCorrect: true,
+        justif: "Exact (Section 3). Le texte mentionne explicitement la régression logistique ou le modèle de Cox."
+      },
+      {
+        letter: "C",
+        text: "Cette méthode permet de contrôler statistiquement l'effet de confusion des caractéristiques initiales sur une variable continue unique.",
+        isCorrect: true,
+        justif: "Exact (Section 3). C'est l'impact méthodologique central de l'ajustement sur score."
+      },
+      {
+        letter: "D",
+        text: "Cette technique présente l'avantage d'opérer sans réduire la taille d'échantillon.",
+        isCorrect: true,
+        justif: "Exact (Section 3). Contrairement à l'appariement, aucun patient n'est exclu, préservant la taille de l'échantillon."
+      },
+      {
+        letter: "E",
+        text: "L'ajustement multivarié sur le score exige d'exclure tous les patients dont le score est compris entre 0,4 et 0,6.",
+        isCorrect: false,
+        justif: "Faux (Section 3). L'ensemble des patients est conservé sans exclusion arbitraire."
+      }
+    ]
+  },
+  {
+    id: 8,
+    theme: "Section 3 : Méthode 3 - L'Appariement en Cas-Témoins",
+    scenario: "Mise en situation : Les investigateurs conduisent une étude d'observation rétrospective pour comparer des sujets malades à des sujets indemnes.",
+    statement: "Concernant l'application du score de propension dans une étude cas-témoins, quelles sont les propositions exactes ?",
+    props: [
+      {
+        letter: "A",
+        text: "Il s'agit d'une application rétrospective du score de propension.",
+        isCorrect: true,
+        justif: "Exact (Section 3). Le cours spécifie textuellement : 'Application rétrospective'."
+      },
+      {
+        letter: "B",
+        text: "On apparie les patients malades (les Cas) aux sujets indemnes (les Témoins) sur leur score de propension de l'exposition passée.",
+        isCorrect: true,
+        justif: "Exact (Section 3). Principe clinique : apparier Cas et Témoins sur le score d'exposition passée."
+      },
+      {
+        letter: "C",
+        text: "Cette méthode permet d'améliorer la comparabilité entre Cas et Témoins sur de multiples facteurs d'exposition potentiels en présence de biais de sélection.",
+        isCorrect: true,
+        justif: "Exact (Section 3). C'est le bénéfice méthodologique explicitement formulé dans le tableau."
+      },
+      {
+        letter: "D",
+        text: "L'étude cas-témoins ainsi appariée devient une étude prospective d'intervention.",
+        isCorrect: false,
+        justif: "Faux (Section 3). L'étude reste strictement rétrospective et observationnelle."
+      },
+      {
+        letter: "E",
+        text: "Cette approche dispense les investigateurs de mesurer les facteurs de risque chez les Cas.",
+        isCorrect: false,
+        justif: "Faux (Section 3). Il faut impérativement recueillir les facteurs pour pouvoir modéliser le score."
+      }
+    ]
+  },
+  {
+    id: 9,
+    theme: "Section 4 : Piège des Examens (Différence avec la Randomisation)",
+    scenario: "Question d'examen LCA : 'Dans quelle mesure un score de propension permet-il de contrôler les facteurs de confusion comparativement à une randomisation ?'",
+    statement: "Concernant cette différence majeure selon les règles méthodologiques du cours, quelles sont les propositions exactes ?",
+    props: [
+      {
+        letter: "A",
+        text: "Le score de propension ne peut prendre en compte, équilibrer et contrôler que les facteurs de confusion connus, mesurés et saisis dans le modèle par les investigateurs a priori.",
+        isCorrect: true,
+        justif: "Exact (Section 4). Limitation fondamentale : le modèle ne prend en compte que les variables connues et mesurées a priori."
+      },
+      {
+        letter: "B",
+        text: "La randomisation probabiliste d'un essai clinique équilibre par nature les facteurs de confusion connus ET inconnus.",
+        isCorrect: true,
+        justif: "Exact (Section 4). C'est la propriété exclusive et essentielle du tirage au sort (randomisation)."
+      },
+      {
+        letter: "C",
+        text: "Le score de propension ne protège pas contre les variables cachées ou non mesurées.",
+        isCorrect: true,
+        justif: "Exact (Section 4). Contrairement à la randomisation, il est impuissant face aux variables cachées/non mesurées."
+      },
+      {
+        letter: "D",
+        text: "L'appariement sur score de propension remplace parfaitement la randomisation d'un essai contrôlé.",
+        isCorrect: false,
+        justif: "Faux (Section 4). Piège classique : il ne protège pas contre les facteurs inconnus, donc ne remplace pas la randomisation."
+      },
+      {
+        letter: "E",
+        text: "Cette distinction entre facteurs connus et inconnus constitue la question piège classique et incontournable dans les épreuves de LCA.",
+        isCorrect: true,
+        justif: "Exact (Section 4). La fiche souligne ce point comme le piège des examens par excellence."
+      }
+    ]
+  },
+  {
+    id: 10,
+    theme: "Section 4 : Biais Résiduel & Lien de Causalité",
+    scenario: "Conclusion d'article : 'Notre étude de cohorte appariée sur score de propension démontre sans équivoque et de façon indiscutable un lien de causalité direct entre le traitement et la réduction des décès.'",
+    statement: "En tant qu'analyste critique de LCA, quelles sont les propositions exactes concernant cette conclusion ?",
+    props: [
+      {
+        letter: "A",
+        text: "La conclusion des auteurs est méthodologiquement irréprochable car le score de propension élimine tout biais d'indication.",
+        isCorrect: false,
+        justif: "Faux (Section 4). Affirmation irrecevable : le score ne protège pas contre les facteurs cachés."
+      },
+      {
+        letter: "B",
+        text: "Il persiste systématiquement un risque de biais de confusion résiduel.",
+        isCorrect: true,
+        justif: "Exact (Section 4). Comme les variables cachées ne sont pas équilibrées, un biais de confusion résiduel persiste systématiquement."
+      },
+      {
+        letter: "C",
+        text: "L'utilisation d'un score de propension, bien que robuste, n'autorise jamais à établir de façon certaine et indiscutable un lien de causalité.",
+        isCorrect: true,
+        justif: "Exact (Section 4). Mot pour mot la conclusion du cours sur les limites épistémologiques du score."
+      },
+      {
+        letter: "D",
+        text: "La méthode du score de propension est considérée comme robuste par la méthodologie épidémiologique.",
+        isCorrect: true,
+        justif: "Exact (Section 4). Le texte confirme qu'il s'agit d'une méthode robuste, malgré ses limites intrinsèques."
+      },
+      {
+        letter: "E",
+        text: "Un score de propension calculé sur plus de 10 000 patients confère automatiquement un lien de causalité indiscutable.",
+        isCorrect: false,
+        justif: "Faux (Section 4). Même avec un grand échantillon, le risque de variables cachées non mesurées persiste toujours."
+      }
+    ]
+  }
+];
+
+/* ==========================================================================
+   GESTIONNAIRE D'ÉTAT & NOTATION OFFICIELLE CONCOURS (DOCIMOLOGIE EDN)
+   ========================================================================== */
+let currentIndex = 0;
+let userAnswers = {}; // { qId: [indices cochés] }
+let questionScores = {}; // { qId: points (0.0 à 2.0) }
+let isValidated = false;
+
+function initQuiz() {
+  const stepper = document.getElementById('stepper');
+  stepper.innerHTML = '';
+  questions.forEach((q, idx) => {
+    const dot = document.createElement('div');
+    dot.className = 'step-dot' + (idx === 0 ? ' active' : '');
+    dot.id = `step-${idx}`;
+    stepper.appendChild(dot);
+  });
+  afficherQuestion(0);
+}
+
+function updateStepper() {
+  questions.forEach((q, idx) => {
+    const dot = document.getElementById(`step-${idx}`);
+    dot.className = 'step-dot';
+    if (idx === currentIndex) {
+      dot.classList.add('active');
+    } else if (questionScores[q.id] !== undefined) {
+      dot.classList.add('completed');
+    }
+  });
+}
+
+function updateHeaderScore() {
+  let total = 0;
+  let count = 0;
+  Object.keys(questionScores).forEach(id => {
+    total += questionScores[id];
+    count++;
+  });
+  const scoreBadge = document.getElementById('score-badge');
+  if (count === 0) {
+    scoreBadge.innerText = "Note : 0.0 / 20";
+  } else {
+    scoreBadge.innerText = `Note cumulée : ${total.toFixed(1)} / 20`;
+  }
+}
+
+function afficherQuestion(index) {
+  currentIndex = index;
+  isValidated = false;
+  const q = questions[index];
+
+  updateStepper();
+  document.getElementById('q-counter').innerText = `Question ${index + 1} / ${questions.length}`;
+  document.getElementById('theme-label').innerText = q.theme;
+  document.getElementById('scenario-box').innerText = q.scenario;
+  document.getElementById('statement-box').innerText = q.statement;
+
+  // Cacher le panneau de feedback
+  document.getElementById('feedback-box').style.display = 'none';
+
+  // Remplir les 5 propositions
+  const box = document.getElementById('propositions-box');
+  box.innerHTML = '';
+
+  q.props.forEach((prop, pIdx) => {
+    const label = document.createElement('label');
+    label.className = 'prop-label';
+    label.id = `label-prop-${pIdx}`;
+
+    label.innerHTML = `
+      <div class="prop-header">
+        <input type="checkbox" name="q_${q.id}" value="${pIdx}" class="prop-checkbox" id="cb-${pIdx}">
+        <span class="prop-letter">${prop.letter}.</span>
+        <span class="prop-text">${prop.text}</span>
+      </div>
+      <div class="prop-justif" id="justif-${pIdx}">
+        <span class="pill-status ${prop.isCorrect ? 'vrai' : 'faux'}">${prop.isCorrect ? 'VRAI' : 'FAUX'}</span>
+        ${prop.justif}
+      </div>
+    `;
+    box.appendChild(label);
+  });
+
+  // Réinitialiser le bouton
+  const btn = document.getElementById('action-btn');
+  btn.innerText = "Valider cette question";
+  btn.className = "btn btn-black";
+
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function validerQuestion() {
+  const q = questions[currentIndex];
+  const checkboxes = document.querySelectorAll(`input[name="q_${q.id}"]`);
+  const selected = [];
+
+  checkboxes.forEach(cb => {
+    if (cb.checked) selected.push(parseInt(cb.value, 10));
+    cb.disabled = true; // Verrouille après validation
+  });
+
+  userAnswers[q.id] = selected;
+
+  // Calcul des discordances
+  let discordances = 0;
+  q.props.forEach((prop, pIdx) => {
+    const isChecked = selected.includes(pIdx);
+    const label = document.getElementById(`label-prop-${pIdx}`);
+    const justif = document.getElementById(`justif-${pIdx}`);
+
+    justif.style.display = 'block';
+
+    if (isChecked === prop.isCorrect) {
+      if (isChecked) {
+        label.classList.add('correct-checked');
+      }
+    } else {
+      discordances++;
+      if (isChecked && !prop.isCorrect) {
+        label.classList.add('wrong-checked');
+      } else if (!isChecked && prop.isCorrect) {
+        label.classList.add('missed-true');
+      }
+    }
+  });
+
+  // Barème officiel docimologique concours :
+  // 0 disc = 2.0 | 1 disc = 1.0 | 2 disc = 0.4 | >= 3 disc = 0.0
+  let pts = 0;
+  let verdict = "";
+  if (discordances === 0) {
+    pts = 2.0;
+    verdict = "Accord Parfait (0 erreur)";
+  } else if (discordances === 1) {
+    pts = 1.0;
+    verdict = "1 Discordance (1 erreur)";
+  } else if (discordances === 2) {
+    pts = 0.4;
+    verdict = "2 Discordances (2 erreurs)";
+  } else {
+    pts = 0.0;
+    verdict = `${discordances} Discordances (Note = 0)`;
+  }
+
+  questionScores[q.id] = pts;
+  updateHeaderScore();
+  updateStepper();
+
+  // Affichage du feedback immédiat
+  const feedbackBox = document.getElementById('feedback-box');
+  const feedbackStatus = document.getElementById('feedback-status');
+  const feedbackScore = document.getElementById('feedback-score');
+  const feedbackDetail = document.getElementById('feedback-detail');
+
+  feedbackStatus.innerText = verdict;
+  feedbackScore.innerText = `Note Q${q.id} : ${pts.toFixed(1)} / 2.0 pts`;
+
+  const trueLetters = q.props.filter(p => p.isCorrect).map(p => p.letter).join(", ");
+  feedbackDetail.innerHTML = `<strong>Réponses exactes :</strong> [ ${trueLetters} ].<br>Lisez les justifications méthodologiques détaillées affichées pour chaque item ci-dessus.`;
+
+  feedbackBox.style.display = 'block';
+
+  isValidated = true;
+  const btn = document.getElementById('action-btn');
+  if (currentIndex < questions.length - 1) {
+    btn.innerText = `Passer à la question suivante (${currentIndex + 2} / 10) →`;
+  } else {
+    btn.innerText = "Afficher le bilan final et la note sur 20 →";
+  }
+}
+
+function gererAction() {
+  if (!isValidated) {
+    validerQuestion();
+  } else {
+    if (currentIndex < questions.length - 1) {
+      afficherQuestion(currentIndex + 1);
+    } else {
+      afficherBilanFinal();
+    }
+  }
+}
+
+function afficherBilanFinal() {
+  document.getElementById('question-screen').style.display = 'none';
+  document.getElementById('final-screen').style.display = 'flex';
+  document.getElementById('q-counter').innerText = "Épreuve terminée";
+
+  let totalSur20 = 0;
+  questions.forEach(q => {
+    totalSur20 += (questionScores[q.id] || 0);
+  });
+
+  document.getElementById('final-score-val').innerText = `${totalSur20.toFixed(1)} / 20`;
+
+  const apprec = document.getElementById('final-apprec-text');
+  if (totalSur20 >= 18) {
+    apprec.innerText = "Rang A / Maîtrise Exceptionnelle : Vous maîtrisez parfaitement le score de propension, ses méthodes d'exploitation et ses pièges classiques d'examen.";
+  } else if (totalSur20 >= 14) {
+    apprec.innerText = "Très Bon Niveau : Les concepts fondamentaux sont bien assimilés. Analysez vos discordances dans le tableau récapitulatif pour consolider les détails.";
+  } else if (totalSur20 >= 10) {
+    apprec.innerText = "Niveau Moyen / Admissible : Des confusions méthodologiques persistent, notamment sur l'ajustement vs appariement ou l'absence d'équilibrage des variables cachées.";
+  } else {
+    apprec.innerText = "Niveau Insuffisant : Relecture attentive de la fiche de cours requise, en ciblant le biais d'indication et la différence majeure avec la randomisation.";
+  }
+
+  const tbody = document.getElementById('summary-tbody');
+  tbody.innerHTML = '';
+  questions.forEach(q => {
+    const tr = document.createElement('tr');
+    const uChoices = (userAnswers[q.id] || []).map(i => q.props[i].letter).join(", ") || "Aucune";
+    const cChoices = q.props.filter(p => p.isCorrect).map(p => p.letter).join(", ");
+    const pts = (questionScores[q.id] || 0).toFixed(1);
+
+    tr.innerHTML = `
+      <td class="center"><strong>Q${q.id}</strong></td>
+      <td>${q.theme}</td>
+      <td class="center">[ ${uChoices} ]</td>
+      <td class="center"><strong>[ ${cChoices} ]</strong></td>
+      <td class="center">${pts} / 2</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const btn = document.getElementById('action-btn');
+  btn.innerText = "Recommencer le quiz à blanc";
+  btn.className = "btn btn-white";
+  btn.onclick = () => {
+    userAnswers = {};
+    questionScores = {};
+    document.getElementById('final-screen').style.display = 'none';
+    document.getElementById('question-screen').style.display = 'flex';
+    btn.onclick = gererAction;
+    initQuiz();
+  };
+
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+document.addEventListener('DOMContentLoaded', initQuiz);
+</script>
+
+</body>
+</html>
