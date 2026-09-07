@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LCA Masterclass — Fiabilité & Concordance</title>
+<style>
+  /* ==========================================================================
+     DESIGN ÉDITORIAL MODERNE SPÉCIAL E-INK (ONYX BOOX GO 10.3)
+     - Adieu l'ambiance "cellule de dégrisement" : typographie soignée, arrondis,
+       cartes modernes style Notion/Amboss, badges élégants et graphiques léchés.
+     - Contraste optimisé pour dalle Carta 1200 (nuances de gris bien étagées).
+     - Zéro animation pour supprimer toute latence et ghosting.
+     ========================================================================== */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  :root {
+    --ink-black: #111111;
+    --ink-dark: #2a2d34;
+    --ink-mid: #555a64;
+    --ink-soft: #888e99;
+    --ink-light: #e8eaee;
+    --ink-bg-soft: #f4f5f7;
+    --ink-bg-card: #fafbfc;
+    --ink-white: #ffffff;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--ink-white);
+    color: var(--ink-black);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .app-frame {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 12px 16px;
+    min-height: 98vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* ------------------ EN-TÊTE ÉLÉGANT ------------------ */
+  header {
+    border-bottom: 2px solid var(--ink-black);
+    padding-bottom: 10px;
+    margin-bottom: 8px;
+  }
+
+  .nav-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--ink-black);
+    color: var(--ink-white);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .score-capsule {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1.5px solid var(--ink-black);
+    padding: 2px 10px;
+    border-radius: 20px;
+    background: var(--ink-white);
+    font-size: 12.5px;
+    font-weight: 800;
+  }
+
+  .header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 2px;
+  }
+
+  h1 {
+    font-family: "Georgia", serif;
+    font-size: 19px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
+
+  .step-counter {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: var(--ink-mid);
+  }
+
+  /* Stepper segmenté arrondi */
+  .stepper-track {
+    display: flex;
+    gap: 5px;
+    margin-top: 8px;
+  }
+
+  .step-seg {
+    flex: 1;
+    height: 5px;
+    background: var(--ink-light);
+    border-radius: 4px;
+  }
+
+  .step-seg.active {
+    background: var(--ink-black);
+    height: 6px;
+  }
+
+  .step-seg.done {
+    background: var(--ink-soft);
+  }
+
+  /* ------------------ ZONE QUESTION CARD ------------------ */
+  .question-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .category-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--ink-mid);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--ink-light);
+  }
+
+  .scenario-card {
+    background: var(--ink-bg-soft);
+    border-left: 4px solid var(--ink-black);
+    border-radius: 0 8px 8px 0;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--ink-dark);
+    margin-bottom: 8px;
+    font-style: italic;
+    line-height: 1.35;
+  }
+
+  /* Zone graphique moderne intégrée */
+  .graphic-card {
+    background: var(--ink-white);
+    border: 1.5px solid var(--ink-black);
+    border-radius: 10px;
+    padding: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .graphic-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px dashed var(--ink-light);
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+  }
+
+  .graphic-badge {
+    background: var(--ink-bg-soft);
+    border: 1px solid var(--ink-soft);
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+
+  .prompt-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    line-height: 1.35;
+    margin-bottom: 8px;
+    color: var(--ink-black);
+  }
+
+  /* ------------------ PROPOSITIONS (A, B, C, D, E) ------------------ */
+  .options-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .option-card {
+    border: 1.5px solid var(--ink-light);
+    background: var(--ink-bg-card);
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    min-height: 42px;
+  }
+
+  .option-card:hover {
+    border-color: var(--ink-black);
+  }
+
+  .option-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .option-check {
+    margin-top: 2px;
+    transform: scale(1.25);
+    cursor: pointer;
+    accent-color: var(--ink-black);
+  }
+
+  .letter-tag {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--ink-bg-soft);
+    border: 1px solid var(--ink-soft);
+    font-weight: 900;
+    font-size: 12px;
+    color: var(--ink-black);
+    flex-shrink: 0;
+  }
+
+  .option-text {
+    flex: 1;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ink-dark);
+  }
+
+  /* État validé */
+  .option-card.state-good {
+    border: 2px solid var(--ink-black);
+    background: var(--ink-bg-soft);
+  }
+  .option-card.state-good .letter-tag {
+    background: var(--ink-black);
+    color: var(--ink-white);
+    border-color: var(--ink-black);
+  }
+
+  .option-card.state-bad {
+    border: 2px dashed var(--ink-black);
+    background: var(--ink-white);
+  }
+
+  .option-card.state-missed {
+    border: 2px solid var(--ink-soft);
+    background: #fdfdfd;
+  }
+
+  /* Explications sous chaque item */
+  .option-rationale {
+    display: none;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--ink-light);
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--ink-dark);
+  }
+
+  .verdict-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 7px;
+    border-radius: 12px;
+    font-size: 10.5px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+
+  .verdict-tag.vrai {
+    background: var(--ink-black);
+    color: var(--ink-white);
+  }
+
+  .verdict-tag.faux {
+    background: var(--ink-white);
+    color: var(--ink-black);
+    border: 1.5px solid var(--ink-black);
+  }
+
+  /* ------------------ FEEDBACK BANNER IMMÉDIAT ------------------ */
+  .feedback-banner {
+    display: none;
+    border: 2px solid var(--ink-black);
+    border-radius: 8px;
+    padding: 8px 12px;
+    background: var(--ink-white);
+    margin-top: 6px;
+  }
+
+  .feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 900;
+    border-bottom: 1px solid var(--ink-light);
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+  }
+
+  .score-bubble {
+    background: var(--ink-bg-soft);
+    border: 1.5px solid var(--ink-black);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .feedback-body {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  /* ------------------ BARRE D'ACTIONS (FIXE EN BAS) ------------------ */
+  .action-deck {
+    border-top: 2px solid var(--ink-black);
+    padding-top: 8px;
+    margin-top: 6px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-action {
+    border: 2px solid var(--ink-black);
+    border-radius: 8px;
+    padding: 11px 18px;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    min-height: 44px;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--ink-black);
+    color: var(--ink-white);
+  }
+
+  .btn-secondary {
+    background: var(--ink-white);
+    color: var(--ink-black);
+  }
+
+  .btn-action:active {
+    outline: 2px solid var(--ink-black);
+  }
+
+  /* ------------------ ÉCRAN FINAL : BILAN CONCOURS ------------------ */
+  #final-screen {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .grade-card {
+    border: 2.5px solid var(--ink-black);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    background: var(--ink-bg-card);
+  }
+
+  .grade-sup {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ink-mid);
+  }
+
+  .grade-val {
+    font-family: "Georgia", serif;
+    font-size: 46px;
+    font-weight: 900;
+    margin: 2px 0;
+    color: var(--ink-black);
+  }
+
+  .grade-rank {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 14px;
+    background: var(--ink-black);
+    color: var(--ink-white);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .grade-comment {
+    font-size: 13.5px;
+    font-weight: 600;
+    border-top: 1px dashed var(--ink-light);
+    padding-top: 8px;
+    color: var(--ink-dark);
+  }
+
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1.5px solid var(--ink-black);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 12px;
+  }
+
+  .summary-table th, .summary-table td {
+    border: 1px solid var(--ink-light);
+    padding: 5px 8px;
+    text-align: left;
+  }
+
+  .summary-table th {
+    background: var(--ink-black);
+    color: var(--ink-white);
+    font-weight: 800;
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+
+  .summary-table tr:nth-child(even) {
+    background: var(--ink-bg-soft);
+  }
+
+  .summary-table td.center {
+    text-align: center;
+    font-weight: 800;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-frame">
+  <!-- Header -->
+  <header>
+    <div class="nav-top">
+      <div class="brand-badge">
+        <span>★ LCA Masterclass</span>
+        <span style="opacity:0.6;">|</span>
+        <span>Onyx Boox Edition</span>
+      </div>
+      <div class="score-capsule" id="score-capsule">
+        <span>Score live :</span>
+        <strong id="live-score-val">0.0 / 20</strong>
+      </div>
+    </div>
+    <div class="header-main">
+      <h1>Fiabilité, Corrélation & Concordance</h1>
+      <span class="step-counter" id="step-counter">Question 01 / 10</span>
+    </div>
+    <div class="stepper-track" id="stepper-track"></div>
+  </header>
+
+  <!-- Zone Question -->
+  <div class="question-container" id="question-screen">
+    <div class="category-strip">
+      <span id="theme-label">Thématique Méthodologique</span>
+      <span>Docimologie EDN • 2 pts / item</span>
+    </div>
+
+    <div class="scenario-card" id="scenario-text"></div>
+
+    <!-- Carte Graphique SVG -->
+    <div class="graphic-card" id="graphic-card" style="display:none;">
+      <div class="graphic-header">
+        <span id="graphic-title">Figure d'analyse</span>
+        <span class="graphic-badge">Graphique LCA</span>
+      </div>
+      <div id="graphic-svg-wrap" style="width:100%; display:flex; justify-content:center;"></div>
+    </div>
+
+    <div class="prompt-title" id="statement-text"></div>
+
+    <div class="options-stack" id="options-stack"></div>
+
+    <!-- Feedback immédiat -->
+    <div class="feedback-banner" id="feedback-banner">
+      <div class="feedback-header">
+        <span id="feedback-verdict">Résultat de l'analyse</span>
+        <span class="score-bubble" id="feedback-points">0.0 / 2.0 pts</span>
+      </div>
+      <div class="feedback-body" id="feedback-body"></div>
+    </div>
+  </div>
+
+  <!-- Écran Final Bilan Concours -->
+  <div id="final-screen">
+    <div class="grade-card">
+      <div class="grade-sup">Résultat Officiel d'Épreuve LCA</div>
+      <div class="grade-val" id="final-score-text">-- / 20</div>
+      <div class="grade-rank" id="final-rank-tag">Rang A</div>
+      <div class="grade-comment" id="final-comment-text"></div>
+    </div>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th style="width:36px; text-align:center;">N°</th>
+          <th>Thème méthodologique</th>
+          <th style="text-align:center;">Vos coches</th>
+          <th style="text-align:center;">Attendu</th>
+          <th style="text-align:center;">Note</th>
+        </tr>
+      </thead>
+      <tbody id="summary-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Barre Action Bas -->
+  <div class="action-deck">
+    <button type="button" class="btn-action btn-primary" id="main-btn" onclick="onMainAction()">
+      <span>Valider mes réponses</span>
+      <span>→</span>
+    </button>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   DONNÉES MÉTHODOLOGIQUES DU QUIZ + GRAPHISMES VECTORIELS ÉLÉGANTS
+   ========================================================================== */
+const questions = [
+  {
+    id: 1,
+    theme: "Concept Fondateur • Reproductibilité Intra/Inter",
+    scenario: "Mise en situation clinique : Vous évaluez un nouvel échographe Doppler pour quantifier le degré de sténose carotidienne. Les auteurs comparent les mesures prises par un même opérateur le matin et l'après-midi, puis par deux radiologues seniors distincts.",
+    statement: "Concernant le concept de fiabilité et de reproductibilité en LCA, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "La fiabilité d'un test diagnostique correspond strictement à sa reproductibilité intra-observateur ou inter-observateur.",
+        isCorrect: true,
+        justif: "Exact (Section 1). En LCA, la fiabilité d'un test définit strictement son aptitude à la reproductibilité intra ou inter-observateur."
+      },
+      {
+        letter: "B",
+        text: "La fiabilité définit l'aptitude d'une mesure à donner des résultats identiques lorsque les conditions de mesure restent stables.",
+        isCorrect: true,
+        justif: "Exact (Section 1). C'est la définition fondamentale de la reproductibilité clinique."
+      },
+      {
+        letter: "C",
+        text: "La reproductibilité intra-observateur mesure l'accord entre deux cliniciens distincts examinant simultanément le même patient.",
+        isCorrect: false,
+        justif: "Faux (Section 1). C'est la définition de la reproductibilité INTER-observateur. La reproductibilité INTRA-observateur s'évalue chez un même évaluateur à deux moments différents."
+      },
+      {
+        letter: "D",
+        text: "La corrélation et la concordance sont deux entités statistiques distinctes qui s'excluent mutuellement dans leur finalité clinique.",
+        isCorrect: true,
+        justif: "Exact (Section 1). Exigence critique des examens : ces notions poursuivent deux buts distincts et ne doivent jamais être confondues."
+      },
+      {
+        letter: "E",
+        text: "La corrélation mesure l'identité exacte des valeurs, tandis que la concordance mesure la tendance d'évolution conjointe.",
+        isCorrect: false,
+        justif: "Faux (Section 1). Inversion complète : la corrélation évalue la tendance d'évolution simultanée, et la concordance mesure l'exactitude de l'accord."
+      }
+    ]
+  },
+  {
+    id: 2,
+    theme: "La Corrélation • Pearson, Spearman & Coefficient R²",
+    scenario: "Mise en situation : Une étude observationnelle compare deux biomarqueurs sériques. Les auteurs rapportent un coefficient r de Pearson, un coefficient de Spearman et un r².",
+    statement: "Concernant les propriétés mathématiques et cliniques des coefficients de corrélation, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "La corrélation répond à la question : 'Est-ce que les deux variables évoluent ensemble dans le même sens ?' sans se soucier de savoir si les valeurs mesurées sont identiques.",
+        isCorrect: true,
+        justif: "Exact (Section 2). Elle évalue la force et le sens d'une relation d'association linéaire sans exiger l'identité des grandeurs."
+      },
+      {
+        letter: "B",
+        text: "Le coefficient de Pearson est le test non paramétrique de choix lorsque la distribution est asymétrique.",
+        isCorrect: false,
+        justif: "Faux (Section 2). Pearson requiert une distribution symétrique (loi normale). C'est le coefficient de Spearman qui est non paramétrique."
+      },
+      {
+        letter: "C",
+        text: "Le coefficient r varie strictement entre -1 et +1, où r = 0 traduit une absence totale de liaison linéaire.",
+        isCorrect: true,
+        justif: "Exact (Section 2). L'échelle de r est strictement comprise dans l'intervalle [-1 ; +1]."
+      },
+      {
+        letter: "D",
+        text: "Le coefficient de détermination (r²) correspond au pourcentage de la variabilité d'une variable expliquée par la variation de l'autre.",
+        isCorrect: true,
+        justif: "Exact (Section 2). C'est la définition exacte de la variance expliquée par le modèle."
+      },
+      {
+        letter: "E",
+        text: "Le fait que la taille et le poids soient fortement corrélés dans la population implique obligatoirement une forte concordance entre ces deux variables.",
+        isCorrect: false,
+        justif: "Faux (Section 2). Exemple classique : corrélation forte mais concordance impossible (unités et mesures totalement différentes : kg vs m)."
+      }
+    ]
+  },
+  {
+    id: 3,
+    theme: "Lecture Graphique • Nuage de points & Droite de régression",
+    scenario: "Observation méthodologique : Vous examinez la relation entre deux méthodes d'analyse biologique (x et y) mesurées chez 10 patients consécutifs.",
+    statement: "À partir de l'analyse critique de cette modélisation géométrique et des règles du cours, quelles sont les propositions exactes ?",
+    graphic: {
+      title: "Figure 1 : Nuage de dispersion et Droite de Régression Linéaire",
+      svg: `<svg viewBox="0 0 480 170" width="100%" height="165" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif;">
+        <rect x="0" y="0" width="480" height="170" fill="#fafbfc" rx="8"/>
+        <!-- Grille discrète -->
+        <line x1="50" y1="30" x2="450" y2="30" stroke="#e8eaee" stroke-width="1"/>
+        <line x1="50" y1="75" x2="450" y2="75" stroke="#e8eaee" stroke-width="1"/>
+        <line x1="50" y1="120" x2="450" y2="120" stroke="#e8eaee" stroke-width="1"/>
+        <!-- Axes -->
+        <line x1="50" y1="140" x2="450" y2="140" stroke="#2a2d34" stroke-width="1.8"/>
+        <line x1="50" y1="140" x2="50" y2="15" stroke="#2a2d34" stroke-width="1.8"/>
+        <text x="250" y="162" font-size="11" font-weight="bold" fill="#111" text-anchor="middle">Biomarqueur A (x)</text>
+        <text x="16" y="75" font-size="11" font-weight="bold" fill="#111" text-anchor="middle" transform="rotate(-90 16,75)">Biomarqueur B (y)</text>
+        <!-- Ligne d'identité théorique y=x -->
+        <line x1="50" y1="140" x2="430" y2="20" stroke="#888e99" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <text x="350" y="42" font-size="9" font-weight="bold" fill="#555a64">Ligne d'identité (y = x)</text>
+        <!-- Droite de régression observée -->
+        <line x1="50" y1="135" x2="430" y2="25" stroke="#111" stroke-width="2.2"/>
+        <rect x="235" y="68" width="170" height="20" fill="#ffffff" stroke="#2a2d34" rx="4"/>
+        <text x="320" y="82" font-size="10" font-weight="bold" fill="#111" text-anchor="middle">y = ax + b (r = 0,99 ; r² = 0,98)</text>
+        <!-- Points très proches -->
+        <circle cx="85" cy="125" r="4" fill="#111"/>
+        <circle cx="125" cy="113" r="4" fill="#111"/>
+        <circle cx="165" cy="101" r="4" fill="#111"/>
+        <circle cx="205" cy="90" r="4" fill="#111"/>
+        <circle cx="245" cy="78" r="4" fill="#111"/>
+        <circle cx="285" cy="67" r="4" fill="#111"/>
+        <circle cx="325" cy="55" r="4" fill="#111"/>
+        <circle cx="365" cy="44" r="4" fill="#111"/>
+        <circle cx="405" cy="33" r="4" fill="#111"/>
+        <circle cx="425" cy="27" r="4" fill="#111"/>
+      </svg>`
+    },
+    props: [
+      {
+        letter: "A",
+        text: "La droite de régression modélise mathématiquement la relation linéaire selon l'équation y = ax + b.",
+        isCorrect: true,
+        justif: "Exact (Section 2). C'est le modèle mathématique linéaire standard reliant la variable y à x."
+      },
+      {
+        letter: "B",
+        text: "Plus le coefficient r est proche de 1 en valeur absolue, plus les points de l'échantillon sont regroupés à proximité immédiate de la droite de régression.",
+        isCorrect: true,
+        justif: "Exact (Section 2). Propriété géométrique textuelle du cours : la force de liaison resserre le nuage autour de la droite."
+      },
+      {
+        letter: "C",
+        text: "Un coefficient r égal à 1 signifie géométriquement que tous les points sont situés exactement sur la droite de régression.",
+        isCorrect: true,
+        justif: "Exact (Section 2). r = 1 définit un alignement parfait de tous les couples de points sur la droite."
+      },
+      {
+        letter: "D",
+        text: "La forte proximité des points avec la droite de régression prouve formellement que les biomarqueurs sont interchangeables en pratique clinique.",
+        isCorrect: false,
+        justif: "Faux (Sections 1 et 2). Piège d'examen majeur : la régression prouve la corrélation, JAMAIS la concordance ni l'interchangeabilité."
+      },
+      {
+        letter: "E",
+        text: "Avec r = 0,99, le coefficient de détermination r² d'environ 0,98 signifie que 98 % de la variabilité d'un biomarqueur est expliquée par l'autre.",
+        isCorrect: true,
+        justif: "Exact (Section 2). r² = (0,99)² ≈ 0,98, soit 98 % de variabilité expliquée."
+      }
+    ]
+  },
+  {
+    id: 4,
+    theme: "Concordance Qualitative • Le Coefficient Kappa de Cohen",
+    scenario: "Mise en situation : Un scanner thoracique et une radiographie pulmonaire sont comparés pour le diagnostic de pneumopathie (Oui vs Non) chez 120 patients suspects. Les auteurs calculent un coefficient Kappa (κ).",
+    statement: "Concernant les propriétés et l'interprétation du coefficient Kappa de Cohen, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Le coefficient Kappa de Cohen est l'outil de référence absolue pour évaluer la concordance de critères de jugement qualitatifs binaires.",
+        isCorrect: true,
+        justif: "Exact (Section 3). Référence incontournable du cours pour les critères qualitatifs binaires."
+      },
+      {
+        letter: "B",
+        text: "Il mesure le degré d'accord entre les tests en excluant rigoureusement la part d'accord attribuable au seul hasard.",
+        isCorrect: true,
+        justif: "Exact (Section 3). Sa formule mathématique soustrait précisément l'accord fortuit de probabilité."
+      },
+      {
+        letter: "C",
+        text: "Un Kappa égal à 0 traduit un accord parfait entre le scanner et la radiographie pulmonaire.",
+        isCorrect: false,
+        justif: "Faux (Section 3). Kappa = 0 signifie un accord purement lié au hasard (équivalent clinique d'un tirage à pile ou face)."
+      },
+      {
+        letter: "D",
+        text: "Un Kappa égal à +1 définit un accord parfait absolu entre les deux examens.",
+        isCorrect: true,
+        justif: "Exact (Section 3). +1 correspond à l'identité totale des résultats diagnostiques."
+      },
+      {
+        letter: "E",
+        text: "Un Kappa strictement inférieur à 0 (κ < 0) traduit un désaccord systématique (opposition totale des examens).",
+        isCorrect: true,
+        justif: "Exact (Section 3). Les examens sont en contradiction plus souvent que ne le voudrait le hasard seul."
+      }
+    ]
+  },
+  {
+    id: 5,
+    theme: "Concordance Quantitative • Le Coefficient de Corrélation Intraclasse (CCI)",
+    scenario: "Mise en situation : Deux chirurgiens mesurent indépendamment le volume tumoral en cm³ (variable continue) chez 40 patients. Le protocole statistique annonce le calcul du CCI.",
+    statement: "Concernant le Coefficient de Corrélation Intraclasse (CCI) selon le cours de LCA, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Le CCI est l'indicateur mathématique de référence pour quantifier la force d'accord de deux mesures quantitatives continues.",
+        isCorrect: true,
+        justif: "Exact (Section 4A). L'étalon-or mathématique pour les variables continues."
+      },
+      {
+        letter: "B",
+        text: "Bien que sa dénomination comporte le terme de 'corrélation', sa construction mathématique est conçue pour mesurer la concordance (l'identité des valeurs).",
+        isCorrect: true,
+        justif: "Exact (Section 4A). Propriété fondamentale soulignée pour éviter toute confusion avec Pearson."
+      },
+      {
+        letter: "C",
+        text: "Le CCI varie strictement de 0 (désaccord complet) à 1 (concordance absolue).",
+        isCorrect: true,
+        justif: "Exact (Section 4A). Son échelle s'étend de 0 à 1, contrairement à Pearson qui va de -1 à +1."
+      },
+      {
+        letter: "D",
+        text: "Une valeur de CCI égale à 0,45 témoigne d'une excellente concordance clinique.",
+        isCorrect: false,
+        justif: "Faux (Section 4A). Seuil conventionnel du cours : un CCI ≤ 0,5 témoigne d'une concordance médiocre ou insuffisante."
+      },
+      {
+        letter: "E",
+        text: "Une valeur de CCI supérieure ou égale à 0,80 traduit une excellente concordance.",
+        isCorrect: true,
+        justif: "Exact (Section 4A). Seuil validé du cours : ≥ 0,80 = concordance excellente."
+      }
+    ]
+  },
+  {
+    id: 6,
+    theme: "Diagramme de Bland-Altman • Principes Géométriques des Axes",
+    scenario: "Mise en situation : Dans une étude évaluant l'interchangeabilité de deux analyseurs de glycémie capillaire, les auteurs recourent au diagramme de Bland-Altman.",
+    statement: "Concernant la construction géométrique et les principes du diagramme de Bland-Altman, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Le diagramme de Bland-Altman est la représentation graphique privilégiée pour évaluer l'interchangeabilité de deux appareils ou méthodes de mesure.",
+        isCorrect: true,
+        justif: "Exact (Section 4B). C'est l'outil visuel de référence en épidémiologie clinique et LCA."
+      },
+      {
+        letter: "B",
+        text: "L'axe des abscisses (Axe X) représente la moyenne arithmétique simple des deux mesures : X = (Valeur_Essai + Valeur_Référence) / 2.",
+        isCorrect: true,
+        justif: "Exact (Section 4B). Formule mathématique exacte de l'axe X."
+      },
+      {
+        letter: "C",
+        text: "L'axe des ordonnées (Axe Y) représente la différence arithmétique simple : Y = Valeur_Essai - Valeur_Référence.",
+        isCorrect: true,
+        justif: "Exact (Section 4B). Formule mathématique exacte de l'axe Y."
+      },
+      {
+        letter: "D",
+        text: "Chaque patient de l'étude est représenté géométriquement par un point unique sur ce graphique.",
+        isCorrect: true,
+        justif: "Exact (Section 4B). Un couple de mesures correspond à un point unique de coordonnées (Moyenne, Différence)."
+      },
+      {
+        letter: "E",
+        text: "L'axe des ordonnées représente le rapport logarithmique des variances des deux examens.",
+        isCorrect: false,
+        justif: "Faux (Section 4B). L'axe Y représente simplement la différence arithmétique simple entre les deux examens."
+      }
+    ]
+  },
+  {
+    id: 7,
+    theme: "Lecture Graphique • Interprétation du Diagramme de Bland-Altman",
+    scenario: "Observation méthodologique : On compare les diamètres tumoraux (cm) obtenus au Scanner (essai) et à l'IRM (référence). Les investigateurs publient la figure ci-dessous.",
+    statement: "À partir de la lecture rigoureuse de ce diagramme de Bland-Altman, quelles sont les propositions exactes ?",
+    graphic: {
+      title: "Figure 2 : Diagramme de Bland-Altman [Différence (Scanner - IRM) en fonction de la Moyenne]",
+      svg: `<svg viewBox="0 0 480 170" width="100%" height="165" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif;">
+        <rect x="0" y="0" width="480" height="170" fill="#fafbfc" rx="8"/>
+        <!-- Zone d'accord (fond tramé léger) -->
+        <rect x="55" y="30" width="400" height="90" fill="#f4f5f7" opacity="0.6"/>
+        <!-- Axes -->
+        <line x1="55" y1="145" x2="455" y2="145" stroke="#2a2d34" stroke-width="1.8"/>
+        <line x1="55" y1="145" x2="55" y2="15" stroke="#2a2d34" stroke-width="1.8"/>
+        <text x="255" y="162" font-size="10.5" font-weight="bold" fill="#111" text-anchor="middle">Moyenne : (Scanner + IRM) / 2 [cm]</text>
+        <text x="16" y="80" font-size="10.5" font-weight="bold" fill="#111" text-anchor="middle" transform="rotate(-90 16,80)">Différence : (Scanner - IRM) [cm]</text>
+        <!-- Graduations Y -->
+        <text x="48" y="148" font-size="9" text-anchor="end">-0.5</text>
+        <text x="48" y="93" font-size="9" text-anchor="end">0.0</text>
+        <text x="48" y="58" font-size="9" text-anchor="end">+0.5</text>
+        <text x="48" y="23" font-size="9" text-anchor="end">+1.0</text>
+        <!-- Ligne Zéro (accord parfait) -->
+        <line x1="55" y1="90" x2="455" y2="90" stroke="#888e99" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <text x="450" y="85" font-size="8.5" font-weight="bold" fill="#555a64" text-anchor="end">Zéro (Accord parfait Y = 0)</text>
+        <!-- Biais Moyen (+0.5 cm) -->
+        <line x1="55" y1="55" x2="455" y2="55" stroke="#111" stroke-width="2.2"/>
+        <rect x="290" y="42" width="160" height="20" fill="#ffffff" stroke="#111" rx="4"/>
+        <text x="370" y="56" font-size="9.5" font-weight="900" fill="#111" text-anchor="middle">Biais moyen = +0,5 cm</text>
+        <!-- Nuage de points -->
+        <circle cx="95" cy="52" r="4" fill="#111"/>
+        <circle cx="135" cy="62" r="4" fill="#111"/>
+        <circle cx="175" cy="48" r="4" fill="#111"/>
+        <circle cx="215" cy="58" r="4" fill="#111"/>
+        <circle cx="255" cy="51" r="4" fill="#111"/>
+        <circle cx="295" cy="63" r="4" fill="#111"/>
+        <circle cx="335" cy="47" r="4" fill="#111"/>
+        <circle cx="375" cy="56" r="4" fill="#111"/>
+        <circle cx="415" cy="53" r="4" fill="#111"/>
+      </svg>`
+    },
+    props: [
+      {
+        letter: "A",
+        text: "La ligne horizontale continue centrale représente le biais moyen de mesure sur l'ensemble de l'échantillon.",
+        isCorrect: true,
+        justif: "Exact (Section 4B). Elle quantifie la moyenne globale des écarts de mesure constatés."
+      },
+      {
+        letter: "B",
+        text: "Le biais moyen étant de +0,5 cm (avec Y = Scanner - IRM), le scanner surestime systématiquement en moyenne la taille de la tumeur de 0,5 cm par rapport à l'IRM.",
+        isCorrect: true,
+        justif: "Exact (Section 4B). La différence positive (Essai - Réf = +0,5) démontre une surestimation moyenne par le test à l'essai."
+      },
+      {
+        letter: "C",
+        text: "Si la ligne centrale était confondue avec la ligne zéro (pointillés), le biais moyen systématique serait nul.",
+        isCorrect: true,
+        justif: "Exact (Section 4B). Zéro de différence moyenne = absence de sur/sous-estimation globale."
+      },
+      {
+        letter: "D",
+        text: "Les points étant dispersés de façon homogène sur toute la largeur de l'abscisse, l'accord est constant et indépendant de la taille tumorale mesurée.",
+        isCorrect: true,
+        justif: "Exact (Section 4B). L'écart moyen reste stable que la tumeur mesure 2 cm ou 15 cm."
+      },
+      {
+        letter: "E",
+        text: "La figure démontre que le scanner et l'IRM sont interchangeables d'emblée sans aucun ajustement.",
+        isCorrect: false,
+        justif: "Faux (Section 4B). Il existe un biais systématique de 0,5 cm qui empêche l'interchangeabilité directe."
+      }
+    ]
+  },
+  {
+    id: 8,
+    theme: "Lecture Graphique Comparative • Corrélation 100% vs Concordance Nulle",
+    scenario: "Simulation du cours : Mesures tumorales par Scanner (essai) et IRM (référence) chez 5 patients : (1 vs 2 cm), (2 vs 3 cm), (3 vs 4 cm), (5 vs 6 cm), (19 vs 20 cm).",
+    statement: "En confrontant attentivement ces deux graphiques issus de la simulation, quelles sont les propositions exactes ?",
+    graphic: {
+      title: "Figure 3 : Panneau comparatif Nuage de dispersion (Gauche) vs Bland-Altman (Droite)",
+      svg: `<svg viewBox="0 0 480 160" width="100%" height="155" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif;">
+        <rect x="0" y="0" width="480" height="160" fill="#fafbfc" rx="8"/>
+        <!-- Panneau Gauche -->
+        <rect x="8" y="8" width="228" height="144" fill="#ffffff" stroke="#2a2d34" stroke-width="1.2" rx="6"/>
+        <text x="122" y="24" font-size="10" font-weight="900" fill="#111" text-anchor="middle">Nuage de points (Pearson r = 1,0)</text>
+        <line x1="35" y1="130" x2="215" y2="130" stroke="#2a2d34" stroke-width="1.5"/>
+        <line x1="35" y1="130" x2="35" y2="35" stroke="#2a2d34" stroke-width="1.5"/>
+        <text x="125" y="144" font-size="8" font-weight="bold" text-anchor="middle">Scanner (cm)</text>
+        <text x="22" y="80" font-size="8" font-weight="bold" text-anchor="middle" transform="rotate(-90 22,80)">IRM</text>
+        <!-- Droite y=x pointillée -->
+        <line x1="35" y1="130" x2="205" y2="35" stroke="#888e99" stroke-width="1.2" stroke-dasharray="3,3"/>
+        <!-- Droite y=x+1 -->
+        <line x1="35" y1="120" x2="205" y2="25" stroke="#111" stroke-width="2"/>
+        <text x="135" y="55" font-size="8" font-weight="bold">y = x + 1 (r = 1,0)</text>
+        <circle cx="45" cy="115" r="3" fill="#111"/>
+        <circle cx="55" cy="109" r="3" fill="#111"/>
+        <circle cx="65" cy="103" r="3" fill="#111"/>
+        <circle cx="85" cy="91" r="3" fill="#111"/>
+        <circle cx="195" cy="30" r="3" fill="#111"/>
+
+        <!-- Panneau Droit -->
+        <rect x="244" y="8" width="228" height="144" fill="#ffffff" stroke="#2a2d34" stroke-width="1.2" rx="6"/>
+        <text x="358" y="24" font-size="10" font-weight="900" fill="#111" text-anchor="middle">Bland-Altman (Concordance = 0 %)</text>
+        <line x1="270" y1="130" x2="450" y2="130" stroke="#2a2d34" stroke-width="1.5"/>
+        <line x1="270" y1="130" x2="270" y2="35" stroke="#2a2d34" stroke-width="1.5"/>
+        <text x="360" y="144" font-size="8" font-weight="bold" text-anchor="middle">Moyenne (Scanner + IRM) / 2</text>
+        <text x="257" y="80" font-size="8" font-weight="bold" text-anchor="middle" transform="rotate(-90 257,80)">Diff.</text>
+        <!-- Ligne Zéro -->
+        <line x1="270" y1="75" x2="450" y2="75" stroke="#888e99" stroke-width="1.2" stroke-dasharray="3,3"/>
+        <text x="445" y="70" font-size="7.5" fill="#555a64" text-anchor="end">Zéro (Y = 0)</text>
+        <!-- Ligne Biais = -1 cm -->
+        <line x1="270" y1="105" x2="450" y2="105" stroke="#111" stroke-width="2"/>
+        <rect x="330" y="94" width="90" height="16" fill="#fff" stroke="#111" rx="3"/>
+        <text x="375" y="106" font-size="8.5" font-weight="900" text-anchor="middle">Biais = -1,0 cm</text>
+        <!-- Points sur Y = -1 -->
+        <circle cx="285" cy="105" r="3" fill="#111"/>
+        <circle cx="300" cy="105" r="3" fill="#111"/>
+        <circle cx="315" cy="105" r="3" fill="#111"/>
+        <circle cx="345" cy="105" r="3" fill="#111"/>
+        <circle cx="435" cy="105" r="3" fill="#111"/>
+      </svg>`
+    },
+    props: [
+      {
+        letter: "A",
+        text: "Sur le panneau de gauche, la corrélation de Pearson est mathématiquement de 100 % (r = 1,0) car la relation d'association linéaire est parfaite.",
+        isCorrect: true,
+        justif: "Exact (Section 5). Les 5 points sont rigoureusement alignés sur une droite, conférant un r = 1,0 parfait."
+      },
+      {
+        letter: "B",
+        text: "Sur le panneau de gauche, le décalage entre la droite de régression et la ligne d'identité (y = x) traduit visuellement l'absence de concordance.",
+        isCorrect: true,
+        justif: "Exact (Section 5). Bien que parallèles, les droites sont décalées d'un centimètre constant."
+      },
+      {
+        letter: "C",
+        text: "Sur le diagramme de Bland-Altman (droite), l'alignement des points sur la ligne Y = -1 cm prouve l'existence d'un biais systématique constant.",
+        isCorrect: true,
+        justif: "Exact (Section 5). Pour chaque sujet, Scanner - IRM = -1 cm de façon constante."
+      },
+      {
+        letter: "D",
+        text: "La concordance réelle de mesure entre les deux appareils est strictement nulle (0 %) car aucun sujet ne présente de mesure identique.",
+        isCorrect: true,
+        justif: "Exact (Section 5). Les appareils ne s'accordent jamais sur la valeur mesurée chez aucun patient."
+      },
+      {
+        letter: "E",
+        text: "Cette simulation démontre que deux méthodes de mesure ayant un r = 1,0 sont parfaitement interchangeables en clinique.",
+        isCorrect: false,
+        justif: "Faux (Section 5). C'est le piège d'examen par excellence : la corrélation parfaite n'implique JAMAIS l'interchangeabilité."
+      }
+    ]
+  },
+  {
+    id: 9,
+    theme: "Synthèse Théorique • La Règle d'Or de l'Implication Asymétrique",
+    scenario: "Question de méthodologie générale : L'interne de spécialité médicale doit maîtriser les relations logiques reliant corrélation et concordance lors de l'analyse d'un article diagnostique.",
+    statement: "Concernant la règle d'or de l'implication asymétrique formulée dans le cours, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Si la concordance est parfaite, alors la corrélation l'est également de manière automatique.",
+        isCorrect: true,
+        justif: "Exact (Section 5). Si deux séries sont identiques, elles évoluent obligatoirement de façon synchrone dans le même sens."
+      },
+      {
+        letter: "B",
+        text: "Une corrélation parfaite (r = 1,0) implique automatiquement une concordance parfaite entre les méthodes.",
+        isCorrect: false,
+        justif: "Faux (Section 5). C'est la réciproque qui est STRICTEMENT FAUSSE, comme démontré dans la simulation."
+      },
+      {
+        letter: "C",
+        text: "La concordance est une exigence méthodologique beaucoup plus stricte et contraignante que la corrélation.",
+        isCorrect: true,
+        justif: "Exact (Sections 1 et 5). Elle requiert l'égalité mathématique absolue et non une simple proportionnalité."
+      },
+      {
+        letter: "D",
+        text: "Dans un article évaluant un nouvel appareil diagnostique, rapporter uniquement un coefficient r de Pearson est méthodologiquement insuffisant.",
+        isCorrect: true,
+        justif: "Exact (Sections 1, 4 et 5). Pearson est insuffisant car il ne teste pas l'interchangeabilité clinique."
+      },
+      {
+        letter: "E",
+        text: "La corrélation et la concordance peuvent être employées comme des synonymes interchangeables dans la discussion d'un article.",
+        isCorrect: false,
+        justif: "Faux (Section 1). Confondre corrélation et concordance est une erreur méthodologique rédhibitoire en LCA."
+      }
+    ]
+  },
+  {
+    id: 10,
+    theme: "Arbre Décisionnel • Choix des Tests Statistiques en LCA",
+    scenario: "Mise en situation d'examen : Vous devez valider le choix des outils statistiques utilisés par des auteurs dans plusieurs protocoles de recherche diagnostique.",
+    statement: "En vous basant sur la fiche de cours, quelles correspondances entre variable et test statistique de concordance sont rigoureusement valides ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Pneumopathie bactérienne (Présente vs Absente) : utilisation du coefficient Kappa de Cohen.",
+        isCorrect: true,
+        justif: "Exact (Section 3). Variable qualitative binaire -> Kappa de Cohen obligatoire."
+      },
+      {
+        letter: "B",
+        text: "Diamètre tumoral en millimètres mesuré par deux radiologues : utilisation conjointe du CCI et du diagramme de Bland-Altman.",
+        isCorrect: true,
+        justif: "Exact (Section 4). Variable quantitative continue -> CCI et Bland-Altman complémentaires."
+      },
+      {
+        letter: "C",
+        text: "Fraction d'éjection ventriculaire gauche en % : utilisation isolée de la droite de régression linéaire pour valider l'accord.",
+        isCorrect: false,
+        justif: "Faux (Sections 2 et 4). La régression évalue la corrélation linéaire, pas la concordance."
+      },
+      {
+        letter: "D",
+        text: "Diagnostic histologique bénin/malin : utilisation du diagramme de Bland-Altman.",
+        isCorrect: false,
+        justif: "Faux (Section 4B). Bland-Altman exige des variables quantitatives continues (moyenne et différence)."
+      },
+      {
+        letter: "E",
+        text: "Pression artérielle systolique en mmHg : un CCI de 0,85 valide une excellente reproductibilité inter-observateur.",
+        isCorrect: true,
+        justif: "Exact (Section 4A). CCI ≥ 0,80 = concordance quantitative excellente."
+      }
+    ]
+  }
+];
+
+/* ==========================================================================
+   MOTEUR D'INTERACTION & NOTATION OFFICIELLE EDN (CONCOURS)
+   ========================================================================== */
+let currentIndex = 0;
+let userAnswers = {};
+let questionScores = {};
+let isValidated = false;
+
+function initQuiz() {
+  const track = document.getElementById('stepper-track');
+  track.innerHTML = '';
+  questions.forEach((q, idx) => {
+    const seg = document.createElement('div');
+    seg.className = 'step-seg' + (idx === 0 ? ' active' : '');
+    seg.id = `step-seg-${idx}`;
+    track.appendChild(seg);
+  });
+  renderQuestion(0);
+}
+
+function updateStepper() {
+  questions.forEach((q, idx) => {
+    const seg = document.getElementById(`step-seg-${idx}`);
+    seg.className = 'step-seg';
+    if (idx === currentIndex) {
+      seg.classList.add('active');
+    } else if (questionScores[q.id] !== undefined) {
+      seg.classList.add('done');
+    }
+  });
+}
+
+function updateHeaderScore() {
+  let total = 0;
+  let count = 0;
+  Object.keys(questionScores).forEach(id => {
+    total += questionScores[id];
+    count++;
+  });
+  const liveEl = document.getElementById('live-score-val');
+  liveEl.innerText = `${total.toFixed(1)} / 20`;
+}
+
+function renderQuestion(index) {
+  currentIndex = index;
+  isValidated = false;
+  const q = questions[index];
+
+  updateStepper();
+  document.getElementById('step-counter').innerText = `Question ${String(index + 1).padStart(2, '0')} / ${questions.length}`;
+  document.getElementById('theme-label').innerText = q.theme;
+  document.getElementById('scenario-text').innerText = q.scenario;
+  document.getElementById('statement-text').innerText = q.statement;
+
+  // Gestion du graphique SVG
+  const graphicCard = document.getElementById('graphic-card');
+  const graphicTitle = document.getElementById('graphic-title');
+  const graphicSvgWrap = document.getElementById('graphic-svg-wrap');
+
+  if (q.graphic) {
+    graphicCard.style.display = 'flex';
+    graphicTitle.innerText = q.graphic.title;
+    graphicSvgWrap.innerHTML = q.graphic.svg;
+  } else {
+    graphicCard.style.display = 'none';
+    graphicSvgWrap.innerHTML = '';
+  }
+
+  // Cacher le feedback
+  document.getElementById('feedback-banner').style.display = 'none';
+
+  // Remplissage des 5 options
+  const stack = document.getElementById('options-stack');
+  stack.innerHTML = '';
+
+  q.props.forEach((prop, pIdx) => {
+    const card = document.createElement('label');
+    card.className = 'option-card';
+    card.id = `opt-card-${pIdx}`;
+
+    card.innerHTML = `
+      <div class="option-row">
+        <input type="checkbox" name="q_${q.id}" value="${pIdx}" class="option-check" id="chk-${pIdx}">
+        <span class="letter-tag">${prop.letter}</span>
+        <span class="option-text">${prop.text}</span>
+      </div>
+      <div class="option-rationale" id="rationale-${pIdx}">
+        <span class="verdict-tag ${prop.isCorrect ? 'vrai' : 'faux'}">${prop.isCorrect ? '✔ VRAI' : '✘ FAUX'}</span>
+        ${prop.justif}
+      </div>
+    `;
+    stack.appendChild(card);
+  });
+
+  // Bouton
+  const btn = document.getElementById('main-btn');
+  btn.innerHTML = `<span>Valider cette question</span> <span>→</span>`;
+  btn.className = 'btn-action btn-primary';
+
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function evaluateCurrentQuestion() {
+  const q = questions[currentIndex];
+  const checks = document.querySelectorAll(`input[name="q_${q.id}"]`);
+  const selected = [];
+
+  checks.forEach(cb => {
+    if (cb.checked) selected.push(parseInt(cb.value, 10));
+    cb.disabled = true;
+  });
+
+  userAnswers[q.id] = selected;
+
+  let discordances = 0;
+  q.props.forEach((prop, pIdx) => {
+    const isChecked = selected.includes(pIdx);
+    const card = document.getElementById(`opt-card-${pIdx}`);
+    const rationale = document.getElementById(`rationale-${pIdx}`);
+
+    rationale.style.display = 'block';
+
+    if (isChecked === prop.isCorrect) {
+      if (isChecked) card.classList.add('state-good');
+    } else {
+      discordances++;
+      if (isChecked && !prop.isCorrect) card.classList.add('state-bad');
+      else if (!isChecked && prop.isCorrect) card.classList.add('state-missed');
+    }
+  });
+
+  // Barème officiel EDN / LCA
+  let pts = 0;
+  let verdict = "";
+  if (discordances === 0) {
+    pts = 2.0;
+    verdict = "Accord Parfait (0 erreur)";
+  } else if (discordances === 1) {
+    pts = 1.0;
+    verdict = "1 Discordance constatée";
+  } else if (discordances === 2) {
+    pts = 0.4;
+    verdict = "2 Discordances constatées";
+  } else {
+    pts = 0.0;
+    verdict = `${discordances} Discordances (Seuil éliminatoire)`;
+  }
+
+  questionScores[q.id] = pts;
+  updateHeaderScore();
+  updateStepper();
+
+  // Affichage feedback immédiat
+  const banner = document.getElementById('feedback-banner');
+  const fVerdict = document.getElementById('feedback-verdict');
+  const fPoints = document.getElementById('feedback-points');
+  const fBody = document.getElementById('feedback-body');
+
+  fVerdict.innerText = verdict;
+  fPoints.innerText = `${pts.toFixed(1)} / 2.0 pts`;
+
+  const trueLetters = q.props.filter(p => p.isCorrect).map(p => p.letter).join(", ");
+  fBody.innerHTML = `<strong>Réponses attendues :</strong> [ ${trueLetters} ].<br>Consultez ci-dessus l'analyse méthodologique détaillée pour chaque proposition.`;
+
+  banner.style.display = 'block';
+
+  isValidated = true;
+  const btn = document.getElementById('main-btn');
+  if (currentIndex < questions.length - 1) {
+    btn.innerHTML = `<span>Passer à la question suivante (${currentIndex + 2}/10)</span> <span>→</span>`;
+  } else {
+    btn.innerHTML = `<span>Découvrir ma note finale sur 20</span> <span>★</span>`;
+  }
+}
+
+function onMainAction() {
+  if (!isValidated) {
+    evaluateCurrentQuestion();
+  } else {
+    if (currentIndex < questions.length - 1) {
+      renderQuestion(currentIndex + 1);
+    } else {
+      renderFinalScreen();
+    }
+  }
+}
+
+function renderFinalScreen() {
+  document.getElementById('question-screen').style.display = 'none';
+  document.getElementById('final-screen').style.display = 'flex';
+  document.getElementById('step-counter').innerText = "Épreuve Complétée";
+
+  let total = 0;
+  questions.forEach(q => {
+    total += (questionScores[q.id] || 0);
+  });
+
+  document.getElementById('final-score-text').innerText = `${total.toFixed(1)} / 20`;
+
+  const rankTag = document.getElementById('final-rank-tag');
+  const commentEl = document.getElementById('final-comment-text');
+
+  if (total >= 18) {
+    rankTag.innerText = "Rang A • Excellence Méthodologique";
+    commentEl.innerText = "Performance remarquable ! Vous maîtrisez parfaitement les pièges de Bland-Altman, la nuance corrélation vs concordance et la docimologie de concours.";
+  } else if (total >= 14) {
+    rankTag.innerText = "Rang A-B • Très Bon Niveau";
+    commentEl.innerText = "L'ensemble des concepts fondamentaux est bien assimilé. Passez en revue les discordances du tableau pour viser le 20/20.";
+  } else if (total >= 10) {
+    rankTag.innerText = "Rang B • Niveau Moyen";
+    commentEl.innerText = "Des confusions persistent, notamment sur l'interprétation des graphiques ou sur la différence entre Pearson et le CCI.";
+  } else {
+    rankTag.innerText = "Rang C • À retravailler";
+    commentEl.innerText = "Relecture active de la fiche nécessaire. Focalisez-vous sur la règle d'or de l'implication asymétrique et la construction du Bland-Altman.";
+  }
+
+  const tbody = document.getElementById('summary-tbody');
+  tbody.innerHTML = '';
+  questions.forEach(q => {
+    const tr = document.createElement('tr');
+    const uChoices = (userAnswers[q.id] || []).map(i => q.props[i].letter).join(", ") || "—";
+    const cChoices = q.props.filter(p => p.isCorrect).map(p => p.letter).join(", ");
+    const pts = (questionScores[q.id] || 0).toFixed(1);
+
+    tr.innerHTML = `
+      <td class="center"><strong>Q${q.id}</strong></td>
+      <td>${q.theme}</td>
+      <td class="center">${uChoices}</td>
+      <td class="center"><strong>${cChoices}</strong></td>
+      <td class="center">${pts} / 2</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const btn = document.getElementById('main-btn');
+  btn.innerHTML = `<span>Recommencer l'épreuve à zéro</span> <span>↺</span>`;
+  btn.className = 'btn-action btn-secondary';
+  btn.onclick = () => {
+    userAnswers = {};
+    questionScores = {};
+    document.getElementById('final-screen').style.display = 'none';
+    document.getElementById('question-screen').style.display = 'flex';
+    btn.onclick = onMainAction;
+    initQuiz();
+  };
+
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+document.addEventListener('DOMContentLoaded', initQuiz);
+</script>
+
+</body>
+</html>
