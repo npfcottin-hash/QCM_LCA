@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LCA Masterclass — Calcul du Nombre de Sujets Nécessaires</title>
+<style>
+  /* ==========================================================================
+     DESIGN ÉDITORIAL MODERNE HAUT CONTRASTE — OPTIMISÉ ONYX BOOX GO 10.3
+     - Typographie sobre & soignée (Georgia + Sans-serif moderne)
+     - Cartes aux angles arrondis, badges épurés et hiérarchie visuelle claire
+     - Zéro transition, zéro animation (évite la rémanence E-ink Carta 1200)
+     - Format One-Screen Stepper compact (aucun défilement vertical forcé)
+     ========================================================================== */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  :root {
+    --ink-black: #111111;
+    --ink-dark: #2a2d34;
+    --ink-mid: #555a64;
+    --ink-soft: #888e99;
+    --ink-light: #e8eaee;
+    --ink-bg-soft: #f4f5f7;
+    --ink-bg-card: #fafbfc;
+    --ink-white: #ffffff;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--ink-white);
+    color: var(--ink-black);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .app-frame {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 10px 16px;
+    min-height: 98vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* ------------------ EN-TÊTE ÉLÉGANT ------------------ */
+  header {
+    border-bottom: 2px solid var(--ink-black);
+    padding-bottom: 8px;
+    margin-bottom: 6px;
+  }
+
+  .nav-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--ink-black);
+    color: var(--ink-white);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .score-capsule {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1.5px solid var(--ink-black);
+    padding: 2px 10px;
+    border-radius: 20px;
+    background: var(--ink-white);
+    font-size: 12.5px;
+    font-weight: 800;
+  }
+
+  .header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 2px;
+  }
+
+  h1 {
+    font-family: "Georgia", serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
+
+  .step-counter {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: var(--ink-mid);
+  }
+
+  /* Stepper segmenté */
+  .stepper-track {
+    display: flex;
+    gap: 5px;
+    margin-top: 6px;
+  }
+
+  .step-seg {
+    flex: 1;
+    height: 5px;
+    background: var(--ink-light);
+    border-radius: 4px;
+  }
+
+  .step-seg.active {
+    background: var(--ink-black);
+    height: 6px;
+  }
+
+  .step-seg.done {
+    background: var(--ink-soft);
+  }
+
+  /* ------------------ ZONE QUESTION ------------------ */
+  .question-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .category-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--ink-mid);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--ink-light);
+  }
+
+  .scenario-card {
+    background: var(--ink-bg-soft);
+    border-left: 4px solid var(--ink-black);
+    border-radius: 0 8px 8px 0;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    color: var(--ink-dark);
+    margin-bottom: 6px;
+    font-style: italic;
+    line-height: 1.35;
+  }
+
+  /* Carte Graphique SVG intégrée */
+  .graphic-card {
+    background: var(--ink-white);
+    border: 1.5px solid var(--ink-black);
+    border-radius: 8px;
+    padding: 6px;
+    margin-bottom: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .graphic-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px dashed var(--ink-light);
+    padding-bottom: 3px;
+    margin-bottom: 4px;
+  }
+
+  .graphic-badge {
+    background: var(--ink-bg-soft);
+    border: 1px solid var(--ink-soft);
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+
+  .prompt-title {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.35;
+    margin-bottom: 6px;
+    color: var(--ink-black);
+  }
+
+  /* ------------------ PROPOSITIONS (A à E) ------------------ */
+  .options-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 6px;
+  }
+
+  .option-card {
+    border: 1.5px solid var(--ink-light);
+    background: var(--ink-bg-card);
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    min-height: 38px;
+  }
+
+  .option-card:hover {
+    border-color: var(--ink-black);
+  }
+
+  .option-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .option-check {
+    margin-top: 2px;
+    transform: scale(1.25);
+    cursor: pointer;
+    accent-color: var(--ink-black);
+  }
+
+  .letter-tag {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--ink-bg-soft);
+    border: 1px solid var(--ink-soft);
+    font-weight: 900;
+    font-size: 12px;
+    color: var(--ink-black);
+    flex-shrink: 0;
+  }
+
+  .option-text {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ink-dark);
+  }
+
+  /* États après validation */
+  .option-card.state-good {
+    border: 2px solid var(--ink-black);
+    background: var(--ink-bg-soft);
+  }
+  .option-card.state-good .letter-tag {
+    background: var(--ink-black);
+    color: var(--ink-white);
+    border-color: var(--ink-black);
+  }
+
+  .option-card.state-bad {
+    border: 2px dashed var(--ink-black);
+    background: var(--ink-white);
+  }
+
+  .option-card.state-missed {
+    border: 2px solid var(--ink-soft);
+    background: #fdfdfd;
+  }
+
+  .option-rationale {
+    display: none;
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px dashed var(--ink-light);
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--ink-dark);
+  }
+
+  .verdict-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 7px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+
+  .verdict-tag.vrai {
+    background: var(--ink-black);
+    color: var(--ink-white);
+  }
+
+  .verdict-tag.faux {
+    background: var(--ink-white);
+    color: var(--ink-black);
+    border: 1.5px solid var(--ink-black);
+  }
+
+  /* ------------------ FEEDBACK IMMÉDIAT ------------------ */
+  .feedback-banner {
+    display: none;
+    border: 2px solid var(--ink-black);
+    border-radius: 8px;
+    padding: 6px 10px;
+    background: var(--ink-white);
+    margin-top: 4px;
+  }
+
+  .feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12.5px;
+    font-weight: 900;
+    border-bottom: 1px solid var(--ink-light);
+    padding-bottom: 3px;
+    margin-bottom: 3px;
+  }
+
+  .score-bubble {
+    background: var(--ink-bg-soft);
+    border: 1.5px solid var(--ink-black);
+    padding: 1px 8px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    font-weight: 900;
+  }
+
+  .feedback-body {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  /* ------------------ ACTION DECK (FIXE BAS) ------------------ */
+  .action-deck {
+    border-top: 2px solid var(--ink-black);
+    padding-top: 6px;
+    margin-top: 4px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-action {
+    border: 2px solid var(--ink-black);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13.5px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    min-height: 42px;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--ink-black);
+    color: var(--ink-white);
+  }
+
+  .btn-secondary {
+    background: var(--ink-white);
+    color: var(--ink-black);
+  }
+
+  .btn-action:active {
+    outline: 2px solid var(--ink-black);
+  }
+
+  /* ------------------ ÉCRAN FINAL : BILAN ------------------ */
+  #final-screen {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .grade-card {
+    border: 2.5px solid var(--ink-black);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    background: var(--ink-bg-card);
+  }
+
+  .grade-sup {
+    font-size: 11.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ink-mid);
+  }
+
+  .grade-val {
+    font-family: "Georgia", serif;
+    font-size: 42px;
+    font-weight: 900;
+    margin: 2px 0;
+    color: var(--ink-black);
+  }
+
+  .grade-rank {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 12px;
+    background: var(--ink-black);
+    color: var(--ink-white);
+    font-size: 11.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .grade-comment {
+    font-size: 12.5px;
+    font-weight: 600;
+    border-top: 1px dashed var(--ink-light);
+    padding-top: 6px;
+    color: var(--ink-dark);
+  }
+
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1.5px solid var(--ink-black);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 11.5px;
+  }
+
+  .summary-table th, .summary-table td {
+    border: 1px solid var(--ink-light);
+    padding: 4px 6px;
+    text-align: left;
+  }
+
+  .summary-table th {
+    background: var(--ink-black);
+    color: var(--ink-white);
+    font-weight: 800;
+    font-size: 10.5px;
+    text-transform: uppercase;
+  }
+
+  .summary-table tr:nth-child(even) {
+    background: var(--ink-bg-soft);
+  }
+
+  .summary-table td.center {
+    text-align: center;
+    font-weight: 800;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-frame">
+  <!-- Header -->
+  <header>
+    <div class="nav-top">
+      <div class="brand-badge">
+        <span>★ LCA Masterclass</span>
+        <span style="opacity:0.6;">|</span>
+        <span>Onyx Boox Edition</span>
+      </div>
+      <div class="score-capsule" id="score-capsule">
+        <span>Score live :</span>
+        <strong id="live-score-val">0.0 / 20</strong>
+      </div>
+    </div>
+    <div class="header-main">
+      <h1>Calcul du Nombre de Sujets Nécessaires (NSN)</h1>
+      <span class="step-counter" id="step-counter">Question 01 / 10</span>
+    </div>
+    <div class="stepper-track" id="stepper-track"></div>
+  </header>
+
+  <!-- Zone Question -->
+  <div class="question-container" id="question-screen">
+    <div class="category-strip">
+      <span id="theme-label">Thématique Méthodologique</span>
+      <span>Docimologie EDN • 2 pts / item</span>
+    </div>
+
+    <div class="scenario-card" id="scenario-text"></div>
+
+    <!-- Carte Graphique SVG -->
+    <div class="graphic-card" id="graphic-card" style="display:none;">
+      <div class="graphic-header">
+        <span id="graphic-title">Figure d'analyse</span>
+        <span class="graphic-badge">Graphique LCA</span>
+      </div>
+      <div id="graphic-svg-wrap" style="width:100%; display:flex; justify-content:center;"></div>
+    </div>
+
+    <div class="prompt-title" id="statement-text"></div>
+
+    <div class="options-stack" id="options-stack"></div>
+
+    <!-- Feedback immédiat -->
+    <div class="feedback-banner" id="feedback-banner">
+      <div class="feedback-header">
+        <span id="feedback-verdict">Résultat de l'analyse</span>
+        <span class="score-bubble" id="feedback-points">0.0 / 2.0 pts</span>
+      </div>
+      <div class="feedback-body" id="feedback-body"></div>
+    </div>
+  </div>
+
+  <!-- Écran Final Bilan Concours -->
+  <div id="final-screen">
+    <div class="grade-card">
+      <div class="grade-sup">Résultat Officiel d'Épreuve LCA</div>
+      <div class="grade-val" id="final-score-text">-- / 20</div>
+      <div class="grade-rank" id="final-rank-tag">Rang A</div>
+      <div class="grade-comment" id="final-comment-text"></div>
+    </div>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th style="width:34px; text-align:center;">N°</th>
+          <th>Thème méthodologique</th>
+          <th style="text-align:center;">Vos coches</th>
+          <th style="text-align:center;">Attendu</th>
+          <th style="text-align:center;">Note</th>
+        </tr>
+      </thead>
+      <tbody id="summary-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Barre Action Bas -->
+  <div class="action-deck">
+    <button type="button" class="btn-action btn-primary" id="main-btn" onclick="onMainAction()">
+      <span>Valider mes réponses</span>
+      <span>→</span>
+    </button>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   DONNÉES DU QUIZ BASÉES STRICTEMENT SUR LA SOURCE FOURNIE
+   + ÉVALUATIONS GRAPHIQUES HAUT CONTRASTE (SVG VECTORIELS)
+   ========================================================================== */
+const questions = [
+  {
+    id: 1,
+    theme: "Fondements • Paramètres Clés du Calcul du NSN",
+    scenario: "Mise en situation LCA : Vous rédigez la section méthodologique d'un protocole d'essai clinique prospectif comparatif. Vous devez lister l'ensemble des éléments pris en compte pour déterminer le Nombre de Sujets Nécessaires (NSN).",
+    statement: "Selon la fiche de cours, quels paramètres sont pris en compte dans le calcul du NSN ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "La puissance statistique souhaitée (en général fixée à 80 % ou 90 %).",
+        isCorrect: true,
+        justif: "Exact. Le calcul prend en compte la puissance souhaitée, généralement fixée à 80 ou 90 %."
+      },
+      {
+        letter: "B",
+        text: "Le risque alpha (risque de première espèce).",
+        isCorrect: true,
+        justif: "Exact. Le risque alpha fait partie intégrante des paramètres obligatoires du calcul."
+      },
+      {
+        letter: "C",
+        text: "La différence attendue du critère de jugement entre les deux groupes en cas d'étude de supériorité.",
+        isCorrect: true,
+        justif: "Exact. En étude de supériorité, la différence clinique attendue est indispensable pour dimensionner l'échantillon."
+      },
+      {
+        letter: "D",
+        text: "La marge de non-infériorité si l'essai est mené selon un schéma de non-infériorité.",
+        isCorrect: true,
+        justif: "Exact. Dans une étude de non-infériorité, la marge de non-infériorité remplace la différence attendue."
+      },
+      {
+        letter: "E",
+        text: "La capacité maximale de recrutement mensuel par centre investigateur.",
+        isCorrect: false,
+        justif: "Faux. Piège classique : le NSN ne doit jamais se baser sur des paramètres logistiques comme la capacité de recrutement."
+      }
+    ]
+  },
+  {
+    id: 2,
+    theme: "Concept Fondamental • Puissance Statistique & Risque Bêta",
+    scenario: "Extrait méthodologique : 'A sample size was calculated assuming a statistical power of 90% and a two-sided type I error of 5%.'",
+    statement: "Concernant la puissance statistique et le risque bêta (de deuxième espèce), quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "La puissance est définie comme la probabilité de réussir à montrer une différence sachant qu'elle existe dans la vraie vie.",
+        isCorrect: true,
+        justif: "Exact. C'est mot pour mot la définition exacte de la puissance donnée dans la fiche."
+      },
+      {
+        letter: "B",
+        text: "La puissance statistique dépend du nombre d'événements et du nombre de sujets dans l'échantillon.",
+        isCorrect: true,
+        justif: "Exact. La puissance est directement fonction de la taille d'échantillon et du nombre d'événements observés."
+      },
+      {
+        letter: "C",
+        text: "Le risque bêta (deuxième espèce) est la probabilité de ne pas réussir à montrer une différence alors qu'elle existe dans la vraie vie.",
+        isCorrect: true,
+        justif: "Exact. Définition exacte du risque bêta (faux négatif statistique)."
+      },
+      {
+        letter: "D",
+        text: "La puissance et le risque bêta sont liés par la relation mathématique : Puissance = 1 - Risque Bêta (et Risque Bêta = 1 - Puissance).",
+        isCorrect: true,
+        justif: "Exact. La puissance est le complémentaire direct du risque bêta : Puissance = 1 - β."
+      },
+      {
+        letter: "E",
+        text: "Pour une puissance de 90 %, le risque bêta associé consenti par les investigateurs est de 20 %.",
+        isCorrect: false,
+        justif: "Faux. Si la puissance est de 90 %, alors le risque bêta est de 10 % (1 - 0,90 = 0,10, soit 10 %)."
+      }
+    ]
+  },
+  {
+    id: 3,
+    theme: "Concept Fondamental • Le Risque Alpha (Première Espèce)",
+    scenario: "Question d'examen : 'Quelle est la signification méthodologique exacte du risque de première espèce lors du dimensionnement d'une étude ?'",
+    statement: "Concernant le risque alpha selon la fiche de cours, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Il s'agit de la probabilité de conclure à une différence significative, alors que cette différence n'existe pas dans la vraie vie.",
+        isCorrect: true,
+        justif: "Exact. C'est textuellement la définition du risque de première espèce : conclure à tort à une différence."
+      },
+      {
+        letter: "B",
+        text: "Il correspond au risque de conclure à tort (erreur de type faux positif).",
+        isCorrect: true,
+        justif: "Exact. La fiche stipule explicitement qu'il s'agit du 'risque de conclure à tort'."
+      },
+      {
+        letter: "C",
+        text: "Il correspond à la probabilité de rater une différence réelle entre les deux molécules étudiées.",
+        isCorrect: false,
+        justif: "Faux. Rater une différence réelle correspond au risque BÊTA (deuxième espèce), non au risque alpha."
+      },
+      {
+        letter: "D",
+        text: "Une diminution du risque alpha toléré (par exemple passer de 5 % à 1 %) exige une diminution du nombre de sujets nécessaires.",
+        isCorrect: false,
+        justif: "Faux. Être plus rigoureux sur le risque alpha (le diminuer) impose au contraire d'AUGMENTER le NSN."
+      },
+      {
+        letter: "E",
+        text: "Le risque alpha est pris en compte a priori lors du calcul du NSN.",
+        isCorrect: true,
+        justif: "Exact. C'est l'un des paramètres fondamentaux saisis a priori dans la formule de calcul."
+      }
+    ]
+  },
+  {
+    id: 4,
+    theme: "ÉVALUATION GRAPHIQUE • Matrice de Sens de Variation du NSN",
+    scenario: "Observation méthodologique : Le tableau synoptique ci-dessous résume les sens de variation du Nombre de Sujets Nécessaires (NSN) en fonction des paramètres du modèle.",
+    statement: "À partir de l'analyse rigoureuse de cette figure méthodologique, quelles sont les propositions exactes ?",
+    graphic: {
+      title: "Figure 1 : Matrice d'Impact des Paramètres sur le NSN (LCA-ONE)",
+      svg: `<svg viewBox="0 0 480 155" width="100%" height="150" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif;">
+        <rect x="0" y="0" width="480" height="155" fill="#fafbfc" rx="8"/>
+        <!-- Tableau structuré -->
+        <rect x="15" y="10" width="450" height="135" fill="#ffffff" stroke="#2a2d34" stroke-width="1.5" rx="6"/>
+        <!-- Header tableau -->
+        <rect x="15" y="10" width="450" height="28" fill="#111111" rx="5 5 0 0"/>
+        <text x="140" y="28" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">PARAMÈTRE STATISTIQUE</text>
+        <text x="320" y="28" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">VARIATION DU NSN (↑)</text>
+        <text x="415" y="28" font-size="11" font-weight="bold" fill="#ffffff" text-anchor="middle">VARIATION DU NSN (↓)</text>
+
+        <!-- Ligne 1 : Puissance -->
+        <line x1="15" y1="64" x2="465" y2="64" stroke="#e8eaee" stroke-width="1"/>
+        <text x="25" y="52" font-size="10.5" font-weight="bold" fill="#111">Puissance souhaitée (1 - β)</text>
+        <text x="320" y="52" font-size="12" font-weight="900" fill="#111" text-anchor="middle">↑ (Augmente)</text>
+        <text x="415" y="52" font-size="12" font-weight="900" fill="#555a64" text-anchor="middle">↓ (Diminue)</text>
+
+        <!-- Ligne 2 : Risque Alpha -->
+        <line x1="15" y1="92" x2="465" y2="92" stroke="#e8eaee" stroke-width="1"/>
+        <text x="25" y="80" font-size="10.5" font-weight="bold" fill="#111">Risque Alpha (1ère espèce)</text>
+        <text x="320" y="80" font-size="12" font-weight="900" fill="#111" text-anchor="middle">↓ (Diminue)</text>
+        <text x="415" y="80" font-size="12" font-weight="900" fill="#555a64" text-anchor="middle">↑ (Augmente)</text>
+
+        <!-- Ligne 3 : Différence attendue / Marge -->
+        <line x1="15" y1="120" x2="465" y2="120" stroke="#e8eaee" stroke-width="1"/>
+        <text x="25" y="108" font-size="10" font-weight="bold" fill="#111">Différence attendue / Marge non-inf.</text>
+        <text x="320" y="108" font-size="12" font-weight="900" fill="#111" text-anchor="middle">↓ (Diminue)</text>
+        <text x="415" y="108" font-size="12" font-weight="900" fill="#555a64" text-anchor="middle">↑ (Augmente)</text>
+
+        <!-- Ligne 4 : Écart-type -->
+        <text x="25" y="136" font-size="10.5" font-weight="bold" fill="#111">Écart-type du critère quantitatif</text>
+        <text x="320" y="136" font-size="12" font-weight="900" fill="#111" text-anchor="middle">↑ (Augmente)</text>
+        <text x="415" y="136" font-size="12" font-weight="900" fill="#555a64" text-anchor="middle">↓ (Diminue)</text>
+
+        <!-- Séparateurs verticaux -->
+        <line x1="240" y1="10" x2="240" y2="145" stroke="#e8eaee" stroke-width="1"/>
+        <line x1="375" y1="10" x2="375" y2="145" stroke="#e8eaee" stroke-width="1"/>
+      </svg>`
+    },
+    props: [
+      {
+        letter: "A",
+        text: "Si les investigateurs augmentent la puissance souhaitée (de 80 % à 90 %), le NSN augmente obligatoirement (↑).",
+        isCorrect: true,
+        justif: "Exact. Vouloir une puissance accrue nécessite d'inclure davantage de sujets pour sécuriser la mise en évidence d'un effet."
+      },
+      {
+        letter: "B",
+        text: "Si le risque alpha toléré diminue (ex: passage de 5 % à 1 %), le NSN augmente (↑).",
+        isCorrect: true,
+        justif: "Exact. Réduire le risque de faux positif (alpha plus petit) exige une taille d'échantillon plus importante."
+      },
+      {
+        letter: "C",
+        text: "Si la différence attendue entre les groupes diminue, le NSN augmente (↑).",
+        isCorrect: true,
+        justif: "Exact. Détecter un écart thérapeutique minime entre deux traitements exige un échantillon beaucoup plus large."
+      },
+      {
+        letter: "D",
+        text: "Si l'écart-type du critère quantitatif augmente, le NSN augmente (↑).",
+        isCorrect: true,
+        justif: "Exact. Une plus grande dispersion/variabilité des mesures (écart-type élevé) nécessite d'augmenter le NSN."
+      },
+      {
+        letter: "E",
+        text: "Une augmentation de la marge de non-infériorité conduit à une augmentation du NSN.",
+        isCorrect: false,
+        justif: "Faux. Comme l'indique le tableau : si la marge augmente (↑), le NSN diminue (↓) car l'exigence de non-infériorité est plus large."
+      }
+    ]
+  },
+  {
+    id: 5,
+    theme: "Spécificité des Schémas • Différence Attendue vs Non-Infériorité",
+    scenario: "Mise en situation clinique : Deux essais cliniques sont rédigés en parallèle : l'un vise à démontrer la supériorité d'une chimiothérapie A sur B, l'autre la non-infériorité d'une chirurgie ambulatoire par rapport à l'hospitalisation conventionnelle.",
+    statement: "Concernant la différence attendue et la marge de non-infériorité selon le cours, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Dans une étude de supériorité, la différence attendue du critère de jugement entre les deux groupes doit obligatoirement être spécifiée.",
+        isCorrect: true,
+        justif: "Exact. Le calcul repose obligatoirement sur la différence clinique minimale attendue entre les groupes."
+      },
+      {
+        letter: "B",
+        text: "Dans une étude de non-infériorité, le calcul prend en compte la marge de non-infériorité à la place de la différence attendue.",
+        isCorrect: true,
+        justif: "Exact. C'est la marge de non-infériorité préalablement définie qui calibre le NSN."
+      },
+      {
+        letter: "C",
+        text: "Plus la différence attendue entre les traitements est grande, plus le nombre de sujets nécessaires sera important.",
+        isCorrect: false,
+        justif: "Faux. C'est l'inverse : plus la différence attendue est grande (effet massif), plus le NSN requis est FAIBLE (↓)."
+      },
+      {
+        letter: "D",
+        text: "Une marge de non-infériorité plus étroite et exigeante (↓) entraîne une augmentation du NSN (↑).",
+        isCorrect: true,
+        justif: "Exact. Plus la marge tolérée est étroite, plus il faut de sujets pour démontrer statistiquement la non-infériorité."
+      },
+      {
+        letter: "E",
+        text: "La marge de non-infériorité peut être fixée librement a posteriori par les investigateurs après analyse des résultats finaux.",
+        isCorrect: false,
+        justif: "Faux. Tous les paramètres du calcul du NSN doivent être fixés et justifiés a priori dans le protocole."
+      }
+    ]
+  },
+  {
+    id: 6,
+    theme: "Nature du Critère • Critère Quantitatif & Écart-Type",
+    scenario: "Mise en situation : Un essai évalue la baisse de pression artérielle systolique en mmHg (critère quantitatif continu). L'investigateur estime l'écart-type de cette mesure à 15 mmHg.",
+    statement: "Concernant la prise en compte de l'écart-type dans le calcul du NSN, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "L'écart-type du critère de jugement est requis uniquement si le critère de jugement principal est quantitatif.",
+        isCorrect: true,
+        justif: "Exact. La fiche stipule explicitement : 'si critère de jugement quantitatif'."
+      },
+      {
+        letter: "B",
+        text: "Pour un critère binaire qualitatif (décès : Oui/Non), l'écart-type n'est pas un paramètre requis dans la formule du cours.",
+        isCorrect: true,
+        justif: "Exact. Pour une variable binaire, ce sont les pourcentages d'événements attendus qui interviennent."
+      },
+      {
+        letter: "C",
+        text: "Plus l'écart-type estimé est élevé (grande variabilité biologique), plus le nombre de sujets nécessaires sera élevé (↑).",
+        isCorrect: true,
+        justif: "Exact. Un écart-type élevé accroît le bruit de fond statistique, exigeant un échantillon plus vaste pour extraire le signal."
+      },
+      {
+        letter: "D",
+        text: "Une méthode de mesure plus précise diminuant l'écart-type (↓) permet de réduire le NSN (↓).",
+        isCorrect: true,
+        justif: "Exact. La réduction de l'écart-type diminue directement le besoin d'effectif."
+      },
+      {
+        letter: "E",
+        text: "L'écart-type est un paramètre purement optionnel qui peut être omis dans une étude évaluant un critère quantitatif.",
+        isCorrect: false,
+        justif: "Faux. L'écart-type est indispensable pour calibrer la variance d'un critère quantitatif."
+      }
+    ]
+  },
+  {
+    id: 7,
+    theme: "ÉVALUATION GRAPHIQUE • Courbe de Puissance en Fonction de l'Effectif",
+    scenario: "Observation méthodologique : Le graphique ci-dessous représente l'évolution de la puissance statistique (1 - β) en fonction du nombre total de sujets inclus (N) pour un risque alpha fixé à 5 %.",
+    statement: "À partir de l'analyse de cette courbe et des concepts du cours, quelles sont les propositions exactes ?",
+    graphic: {
+      title: "Figure 2 : Évolution de la Puissance (1 - β) en fonction de la Taille d'Échantillon (N)",
+      svg: `<svg viewBox="0 0 480 165" width="100%" height="160" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif;">
+        <rect x="0" y="0" width="480" height="165" fill="#fafbfc" rx="8"/>
+        <!-- Zone seuil 80%-90% -->
+        <rect x="60" y="25" width="400" height="30" fill="#f4f5f7" opacity="0.8"/>
+        <!-- Axes -->
+        <line x1="60" y1="135" x2="460" y2="135" stroke="#2a2d34" stroke-width="1.8"/>
+        <line x1="60" y1="135" x2="60" y2="15" stroke="#2a2d34" stroke-width="1.8"/>
+        <text x="260" y="153" font-size="10.5" font-weight="bold" fill="#111" text-anchor="middle">Nombre de sujets inclus (N)</text>
+        <text x="18" y="75" font-size="10.5" font-weight="bold" fill="#111" text-anchor="middle" transform="rotate(-90 18,75)">Puissance (1 - β)</text>
+
+        <!-- Graduations Y -->
+        <text x="52" y="138" font-size="9" text-anchor="end">0%</text>
+        <text x="52" y="98" font-size="9" text-anchor="end">50%</text>
+        <text x="52" y="58" font-size="9" text-anchor="end">80%</text>
+        <text x="52" y="32" font-size="9" text-anchor="end">90%</text>
+
+        <!-- Lignes horizontales de repère -->
+        <line x1="60" y1="55" x2="460" y2="55" stroke="#888e99" stroke-width="1.2" stroke-dasharray="3,3"/>
+        <line x1="60" y1="28" x2="460" y2="28" stroke="#888e99" stroke-width="1.2" stroke-dasharray="3,3"/>
+        <text x="455" y="51" font-size="8.5" font-weight="bold" fill="#555a64" text-anchor="end">Seuil 80%</text>
+        <text x="455" y="24" font-size="8.5" font-weight="bold" fill="#555a64" text-anchor="end">Seuil 90%</text>
+
+        <!-- Courbe sigmoïde de puissance -->
+        <path d="M 60 132 Q 130 130, 180 100 T 270 55 T 360 28 T 460 20" fill="none" stroke="#111111" stroke-width="2.5"/>
+
+        <!-- Points de projection pour 80% et 90% -->
+        <line x1="270" y1="55" x2="270" y2="135" stroke="#111" stroke-width="1.2" stroke-dasharray="2,2"/>
+        <circle cx="270" cy="55" r="4" fill="#111"/>
+        <text x="270" y="145" font-size="9" font-weight="bold" text-anchor="middle">N = 250</text>
+
+        <line x1="360" y1="28" x2="360" y2="135" stroke="#111" stroke-width="1.2" stroke-dasharray="2,2"/>
+        <circle cx="360" cy="28" r="4" fill="#111"/>
+        <text x="360" y="145" font-size="9" font-weight="bold" text-anchor="middle">N = 380</text>
+      </svg>`
+    },
+    props: [
+      {
+        letter: "A",
+        text: "La puissance augmente de façon non linéaire à mesure que l'effectif d'échantillon N augmente.",
+        isCorrect: true,
+        justif: "Exact. Le gain de puissance suit une dynamique sigmoïde avec un plateau asymptotique proche de 100 %."
+      },
+      {
+        letter: "B",
+        text: "Pour passer d'une puissance conventionnelle de 80 % à 90 %, il est indispensable d'augmenter le nombre de sujets (ici de 250 à 380).",
+        isCorrect: true,
+        justif: "Exact. Une exigence de puissance supérieure majore obligatoirement la taille d'échantillon nécessaire."
+      },
+      {
+        letter: "C",
+        text: "À N = 250 (puissance de 80 %), le risque bêta associé de ne pas mettre en évidence une différence réelle est de 20 %.",
+        isCorrect: true,
+        justif: "Exact. Risque β = 1 - Puissance = 1 - 0,80 = 0,20 (soit 20 %)."
+      },
+      {
+        letter: "D",
+        text: "Si l'essai n'inclut que 100 patients, la puissance sera inférieure à 50 %, exposant l'étude à un risque majeur de faux négatif.",
+        isCorrect: true,
+        justif: "Exact. Une étude sous-dimensionnée manque de puissance pour conclure si l'effet thérapeutique est réel."
+      },
+      {
+        letter: "E",
+        text: "Lorsque la courbe atteint 100 %, le risque d'erreur alpha est mathématiquement réduit à zéro.",
+        isCorrect: false,
+        justif: "Faux. La puissance concerne le risque BÊTA (1 - β). Le risque alpha reste fixé indépendamment par l'investigateur."
+      }
+    ]
+  },
+  {
+    id: 8,
+    theme: "Ajustement Pratique • Les Perdus de Vue Estimés",
+    scenario: "Mise en situation : Dans une étude prospective au long cours sur 5 ans évaluant un antihypertenseur, les investigateurs anticipent un taux d'abandon et de perdus de vue de 15 %.",
+    statement: "Concernant la prise en compte des perdus de vue dans le calcul du NSN, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Le nombre de perdus de vue estimés est mentionné dans le cours comme un paramètre optionnel du calcul du NSN.",
+        isCorrect: true,
+        justif: "Exact. La fiche le qualifie textuellement de '(paramètre optionnel)'."
+      },
+      {
+        letter: "B",
+        text: "Anticiper des perdus de vue conduit les investigateurs à majorer a priori le nombre total de sujets à recruter.",
+        isCorrect: true,
+        justif: "Exact. Pour compenser l'attrition et conserver la puissance statistique voulue au terme du suivi, le NSN initial est majoré."
+      },
+      {
+        letter: "C",
+        text: "Si 200 sujets analysables sont nécessaires et que 10 % de perdus de vue sont estimés, il faut inclure plus de 200 patients à l'inclusion.",
+        isCorrect: true,
+        justif: "Exact. On majore le recrutement pour garantir qu'au moins 200 patients restent évaluables pour l'analyse finale."
+      },
+      {
+        letter: "D",
+        text: "La prise en compte des perdus de vue permet de compenser le risque d'un manque de puissance lié à l'attrition.",
+        isCorrect: true,
+        justif: "Exact. C'est l'objectif méthodologique : éviter que la perte d'effectifs ne fasse chuter la puissance sous le seuil requis."
+      },
+      {
+        letter: "E",
+        text: "Les perdus de vue sont obligatoirement exclus du calcul du NSN car ils constituent un paramètre imprévisible interdit en LCA.",
+        isCorrect: false,
+        justif: "Faux. L'anticipation des perdus de vue est une pratique standard et reconnue en méthodologie clinique."
+      }
+    ]
+  },
+  {
+    id: 9,
+    theme: "ÉVALUATION GRAPHIQUE • Distributions H0 / H1 (Alpha, Bêta & Puissance)",
+    scenario: "Observation méthodologique : Le schéma ci-dessous illustre le principe décisionnel d'un test d'hypothèse bilatéral comparant la distribution sous l'hypothèse nulle H0 (absence de différence) et sous l'hypothèse alternative H1 (différence vraie).",
+    statement: "À partir de l'analyse de cette figure et des définitions du cours, quelles sont les propositions exactes ?",
+    graphic: {
+      title: "Figure 3 : Distributions Décisionnelles sous H0 et H1 (Risque Alpha, Bêta et Puissance)",
+      svg: `<svg viewBox="0 0 480 160" width="100%" height="155" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif;">
+        <rect x="0" y="0" width="480" height="160" fill="#fafbfc" rx="8"/>
+        <!-- Axes horizontaux -->
+        <line x1="30" y1="135" x2="450" y2="135" stroke="#2a2d34" stroke-width="1.8"/>
+
+        <!-- Courbe H0 (Gauche) -->
+        <path d="M 40 135 Q 140 15, 240 135" fill="none" stroke="#555a64" stroke-width="2"/>
+        <text x="140" y="55" font-size="11" font-weight="900" fill="#555a64" text-anchor="middle">H0 : Pas d'effet</text>
+
+        <!-- Courbe H1 (Droite) -->
+        <path d="M 200 135 Q 310 15, 420 135" fill="none" stroke="#111111" stroke-width="2.2"/>
+        <text x="330" y="50" font-size="11" font-weight="900" fill="#111" text-anchor="middle">H1 : Effet réel</text>
+
+        <!-- Seuil décisionnel critique (Ligne verticale) -->
+        <line x1="215" y1="20" x2="215" y2="135" stroke="#111" stroke-width="2" stroke-dasharray="4,3"/>
+        <text x="215" y="15" font-size="9" font-weight="bold" fill="#111" text-anchor="middle">Seuil critique</text>
+
+        <!-- Zone Alpha (sous H0 à droite du seuil) -->
+        <polygon points="215,115 220,123 230,131 240,135 215,135" fill="#111"/>
+        <text x="245" y="115" font-size="9" font-weight="900" fill="#111">Risque α (Faux +)</text>
+
+        <!-- Zone Bêta (sous H1 à gauche du seuil) -->
+        <polygon points="200,135 208,128 215,118 215,135" fill="#888e99" opacity="0.6"/>
+        <text x="165" y="115" font-size="9" font-weight="900" fill="#555a64">Risque β (Faux -)</text>
+
+        <!-- Zone Puissance (sous H1 à droite du seuil) -->
+        <rect x="290" y="80" width="130" height="22" fill="#111" rx="4"/>
+        <text x="355" y="95" font-size="9.5" font-weight="bold" fill="#fff" text-anchor="middle">PUISSANCE (1 - β)</text>
+      </svg>`
+    },
+    props: [
+      {
+        letter: "A",
+        text: "Le risque alpha est représenté par la surface sous la courbe H0 au-delà du seuil critique (conclure à une différence alors qu'H0 est vraie).",
+        isCorrect: true,
+        justif: "Exact. C'est la définition géométrique du risque alpha : rejeter H0 à tort alors que la différence n'existe pas."
+      },
+      {
+        letter: "B",
+        text: "Le risque bêta correspond à la fraction de la courbe H1 située en deçà du seuil critique (ne pas rejeter H0 alors qu'H1 est vraie).",
+        isCorrect: true,
+        justif: "Exact. C'est la probabilité d'échouer à mettre en évidence l'effet alors qu'il existe dans la réalité."
+      },
+      {
+        letter: "C",
+        text: "La puissance statistique correspond à la surface sous la courbe H1 située au-delà du seuil critique (1 - β).",
+        isCorrect: true,
+        justif: "Exact. Elle quantifie la probabilité de détecter la différence quand elle est réelle."
+      },
+      {
+        letter: "D",
+        text: "Déplacer le seuil critique vers la droite pour diminuer le risque alpha entraîne automatiquement une augmentation du risque bêta (et donc une perte de puissance à effectif constant).",
+        isCorrect: true,
+        justif: "Exact. À effectif constant, la réduction d'alpha majore bêta. Pour compenser cela et maintenir la puissance, il faut augmenter le NSN."
+      },
+      {
+        letter: "E",
+        text: "Le risque alpha et le risque bêta sont deux probabilités indépendantes dont la somme est obligatoirement égale à 100 %.",
+        isCorrect: false,
+        justif: "Faux. Alpha et Bêta sont évalués sous des hypothèses distinctes (H0 vs H1). C'est la somme Bêta + Puissance qui vaut 100 %."
+      }
+    ]
+  },
+  {
+    id: 10,
+    theme: "Pièges des Examens • Paramètres Pratiques & Erreurs Rédhibitoires",
+    scenario: "Extrait de copie d'examen LCA : 'Les auteurs ont justifié leur nombre de sujets en expliquant que les 3 centres hospitaliers participants ne pouvaient inclure que 50 patients par an sur la période de financement de 2 ans.'",
+    statement: "Concernant cette justification et les pièges fréquents soulignés par la fiche de cours, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Cette justification est méthodologiquement inacceptable car le NSN ne doit jamais se baser sur la capacité de recrutement des centres.",
+        isCorrect: true,
+        justif: "Exact. La fiche stipule explicitement comme piège fréquent : ne pas se baser sur la capacité de recrutement des centres."
+      },
+      {
+        letter: "B",
+        text: "Le calcul du NSN ne doit pas se baser sur la période de recrutement allouée à l'étude.",
+        isCorrect: true,
+        justif: "Exact. La durée ou période de recrutement est une contrainte pratique exclue du calcul statistique du NSN."
+      },
+      {
+        letter: "C",
+        text: "Le calcul du NSN ne doit pas se baser sur le nombre de centres investigateurs participants.",
+        isCorrect: true,
+        justif: "Exact. Le nombre de centres est un paramètre logistique et organisationnel, non une variable statistique du NSN."
+      },
+      {
+        letter: "D",
+        text: "Dimensionner un échantillon selon des contraintes logistiques plutôt que statistiques expose l'étude à un risque d'essai sous-puissant non concluant.",
+        isCorrect: true,
+        justif: "Exact. Un tel dimensionnement arbitraire expose à une absence de puissance statistique."
+      },
+      {
+        letter: "E",
+        text: "Si les investigateurs disposent d'un budget limité, ils sont méthodologiquement autorisés à substituer le calcul du NSN par leur effectif maximal finançable.",
+        isCorrect: false,
+        justif: "Faux. Les considérations financières ne remplacent jamais le calcul rigoureux du NSN fondé sur alpha, puissance et différence attendue."
+      }
+    ]
+  }
+];
+
+/* ==========================================================================
+   MOTEUR D'INTERACTION & NOTATION OFFICIELLE EDN (CONCOURS)
+   ========================================================================== */
+let currentIndex = 0;
+let userAnswers = {};
+let questionScores = {};
+let isValidated = false;
+
+function initQuiz() {
+  const track = document.getElementById('stepper-track');
+  track.innerHTML = '';
+  questions.forEach((q, idx) => {
+    const seg = document.createElement('div');
+    seg.className = 'step-seg' + (idx === 0 ? ' active' : '');
+    seg.id = `step-seg-${idx}`;
+    track.appendChild(seg);
+  });
+  renderQuestion(0);
+}
+
+function updateStepper() {
+  questions.forEach((q, idx) => {
+    const seg = document.getElementById(`step-seg-${idx}`);
+    seg.className = 'step-seg';
+    if (idx === currentIndex) {
+      seg.classList.add('active');
+    } else if (questionScores[q.id] !== undefined) {
+      seg.classList.add('done');
+    }
+  });
+}
+
+function updateHeaderScore() {
+  let total = 0;
+  let count = 0;
+  Object.keys(questionScores).forEach(id => {
+    total += questionScores[id];
+    count++;
+  });
+  document.getElementById('live-score-val').innerText = `${total.toFixed(1)} / 20`;
+}
+
+function renderQuestion(index) {
+  currentIndex = index;
+  isValidated = false;
+  const q = questions[index];
+
+  updateStepper();
+  document.getElementById('step-counter').innerText = `Question ${String(index + 1).padStart(2, '0')} / ${questions.length}`;
+  document.getElementById('theme-label').innerText = q.theme;
+  document.getElementById('scenario-text').innerText = q.scenario;
+  document.getElementById('statement-text').innerText = q.statement;
+
+  const graphicCard = document.getElementById('graphic-card');
+  const graphicTitle = document.getElementById('graphic-title');
+  const graphicSvgWrap = document.getElementById('graphic-svg-wrap');
+
+  if (q.graphic) {
+    graphicCard.style.display = 'flex';
+    graphicTitle.innerText = q.graphic.title;
+    graphicSvgWrap.innerHTML = q.graphic.svg;
+  } else {
+    graphicCard.style.display = 'none';
+    graphicSvgWrap.innerHTML = '';
+  }
+
+  document.getElementById('feedback-banner').style.display = 'none';
+
+  const stack = document.getElementById('options-stack');
+  stack.innerHTML = '';
+
+  q.props.forEach((prop, pIdx) => {
+    const card = document.createElement('label');
+    card.className = 'option-card';
+    card.id = `opt-card-${pIdx}`;
+
+    card.innerHTML = `
+      <div class="option-row">
+        <input type="checkbox" name="q_${q.id}" value="${pIdx}" class="option-check" id="chk-${pIdx}">
+        <span class="letter-tag">${prop.letter}</span>
+        <span class="option-text">${prop.text}</span>
+      </div>
+      <div class="option-rationale" id="rationale-${pIdx}">
+        <span class="verdict-tag ${prop.isCorrect ? 'vrai' : 'faux'}">${prop.isCorrect ? '✔ VRAI' : '✘ FAUX'}</span>
+        ${prop.justif}
+      </div>
+    `;
+    stack.appendChild(card);
+  });
+
+  const btn = document.getElementById('main-btn');
+  btn.innerHTML = `<span>Valider cette question</span> <span>→</span>`;
+  btn.className = 'btn-action btn-primary';
+
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function evaluateCurrentQuestion() {
+  const q = questions[currentIndex];
+  const checks = document.querySelectorAll(`input[name="q_${q.id}"]`);
+  const selected = [];
+
+  checks.forEach(cb => {
+    if (cb.checked) selected.push(parseInt(cb.value, 10));
+    cb.disabled = true;
+  });
+
+  userAnswers[q.id] = selected;
+
+  let discordances = 0;
+  q.props.forEach((prop, pIdx) => {
+    const isChecked = selected.includes(pIdx);
+    const card = document.getElementById(`opt-card-${pIdx}`);
+    const rationale = document.getElementById(`rationale-${pIdx}`);
+
+    rationale.style.display = 'block';
+
+    if (isChecked === prop.isCorrect) {
+      if (isChecked) card.classList.add('state-good');
+    } else {
+      discordances++;
+      if (isChecked && !prop.isCorrect) card.classList.add('state-bad');
+      else if (!isChecked && prop.isCorrect) card.classList.add('state-missed');
+    }
+  });
+
+  let pts = 0;
+  let verdict = "";
+  if (discordances === 0) {
+    pts = 2.0;
+    verdict = "Accord Parfait (0 erreur)";
+  } else if (discordances === 1) {
+    pts = 1.0;
+    verdict = "1 Discordance constatée";
+  } else if (discordances === 2) {
+    pts = 0.4;
+    verdict = "2 Discordances constatées";
+  } else {
+    pts = 0.0;
+    verdict = `${discordances} Discordances (Seuil éliminatoire)`;
+  }
+
+  questionScores[q.id] = pts;
+  updateHeaderScore();
+  updateStepper();
+
+  const banner = document.getElementById('feedback-banner');
+  const fVerdict = document.getElementById('feedback-verdict');
+  const fPoints = document.getElementById('feedback-points');
+  const fBody = document.getElementById('feedback-body');
+
+  fVerdict.innerText = verdict;
+  fPoints.innerText = `${pts.toFixed(1)} / 2.0 pts`;
+
+  const trueLetters = q.props.filter(p => p.isCorrect).map(p => p.letter).join(", ");
+  fBody.innerHTML = `<strong>Réponses attendues :</strong> [ ${trueLetters} ].<br>Consultez ci-dessus l'analyse méthodologique détaillée pour chaque proposition.`;
+
+  banner.style.display = 'block';
+
+  isValidated = true;
+  const btn = document.getElementById('main-btn');
+  if (currentIndex < questions.length - 1) {
+    btn.innerHTML = `<span>Passer à la question suivante (${currentIndex + 2}/10)</span> <span>→</span>`;
+  } else {
+    btn.innerHTML = `<span>Découvrir ma note finale sur 20</span> <span>★</span>`;
+  }
+}
+
+function onMainAction() {
+  if (!isValidated) {
+    evaluateCurrentQuestion();
+  } else {
+    if (currentIndex < questions.length - 1) {
+      renderQuestion(currentIndex + 1);
+    } else {
+      renderFinalScreen();
+    }
+  }
+}
+
+function renderFinalScreen() {
+  document.getElementById('question-screen').style.display = 'none';
+  document.getElementById('final-screen').style.display = 'flex';
+  document.getElementById('step-counter').innerText = "Épreuve Complétée";
+
+  let total = 0;
+  questions.forEach(q => {
+    total += (questionScores[q.id] || 0);
+  });
+
+  document.getElementById('final-score-text').innerText = `${total.toFixed(1)} / 20`;
+
+  const rankTag = document.getElementById('final-rank-tag');
+  const commentEl = document.getElementById('final-comment-text');
+
+  if (total >= 18) {
+    rankTag.innerText = "Rang A • Excellence Méthodologique";
+    commentEl.innerText = "Performance remarquable ! Vous maîtrisez parfaitement les sens de variation du NSN, les concepts de puissance/alpha/bêta et les pièges classiques d'examen.";
+  } else if (total >= 14) {
+    rankTag.innerText = "Rang A-B • Très Bon Niveau";
+    commentEl.innerText = "L'ensemble des principes méthodologiques est bien acquis. Consultez vos discordances ci-dessous pour sécuriser le sans-faute.";
+  } else if (total >= 10) {
+    rankTag.innerText = "Rang B • Niveau Moyen";
+    commentEl.innerText = "Des confusions persistent sur l'impact de la variation d'alpha, la différence attendue ou les paramètres pratiques.";
+  } else {
+    rankTag.innerText = "Rang C • À retravailler";
+    commentEl.innerText = "Relecture active de la fiche nécessaire. Focalisez-vous sur le tableau des sens de variation et les pièges d'examen.";
+  }
+
+  const tbody = document.getElementById('summary-tbody');
+  tbody.innerHTML = '';
+  questions.forEach(q => {
+    const tr = document.createElement('tr');
+    const uChoices = (userAnswers[q.id] || []).map(i => q.props[i].letter).join(", ") || "—";
+    const cChoices = q.props.filter(p => p.isCorrect).map(p => p.letter).join(", ");
+    const pts = (questionScores[q.id] || 0).toFixed(1);
+
+    tr.innerHTML = `
+      <td class="center"><strong>Q${q.id}</strong></td>
+      <td>${q.theme}</td>
+      <td class="center">${uChoices}</td>
+      <td class="center"><strong>${cChoices}</strong></td>
+      <td class="center">${pts} / 2</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const btn = document.getElementById('main-btn');
+  btn.innerHTML = `<span>Recommencer l'épreuve à zéro</span> <span>↺</span>`;
+  btn.className = 'btn-action btn-secondary';
+  btn.onclick = () => {
+    userAnswers = {};
+    questionScores = {};
+    document.getElementById('final-screen').style.display = 'none';
+    document.getElementById('question-screen').style.display = 'flex';
+    btn.onclick = onMainAction;
+    initQuiz();
+  };
+
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+document.addEventListener('DOMContentLoaded', initQuiz);
+</script>
+
+</body>
+</html>
