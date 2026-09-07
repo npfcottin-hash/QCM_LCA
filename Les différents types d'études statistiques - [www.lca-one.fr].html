@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LCA Masterclass — Les différents types d'études statistiques</title>
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  :root {
+    --ink-black: #0f1115;
+    --ink-dark: #24272e;
+    --ink-mid: #525866;
+    --ink-soft: #8a909e;
+    --ink-border: #d4d7df;
+    --ink-bg-light: #f5f6f9;
+    --ink-bg-card: #ffffff;
+    --ink-white: #ffffff;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--ink-white);
+    color: var(--ink-black);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .app-frame {
+    max-width: 890px;
+    margin: 0 auto;
+    padding: 12px 18px;
+    min-height: 98vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  header {
+    border-bottom: 2px solid var(--ink-black);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+
+  .nav-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink-black);
+    color: var(--ink-white);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+
+  .score-capsule {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1.5px solid var(--ink-black);
+    padding: 3px 12px;
+    border-radius: 20px;
+    background: var(--ink-white);
+    font-size: 12.5px;
+    font-weight: 800;
+  }
+
+  .header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 4px;
+  }
+
+  h1 {
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.2px;
+    color: var(--ink-black);
+  }
+
+  .step-counter {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: var(--ink-mid);
+    background: var(--ink-bg-light);
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--ink-border);
+  }
+
+  .stepper-track {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .step-seg {
+    flex: 1;
+    height: 5px;
+    background: var(--ink-border);
+    border-radius: 4px;
+  }
+
+  .step-seg.active {
+    background: var(--ink-black);
+    height: 6px;
+  }
+
+  .step-seg.done {
+    background: var(--ink-soft);
+  }
+
+  .question-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .category-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--ink-mid);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--ink-border);
+  }
+
+  .scenario-card {
+    background: var(--ink-bg-light);
+    border-left: 4px solid var(--ink-black);
+    border-radius: 0 8px 8px 0;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--ink-dark);
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .graphic-card {
+    background: var(--ink-white);
+    border: 1.5px solid var(--ink-black);
+    border-radius: 10px;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .graphic-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-bottom: 1px dashed var(--ink-border);
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+  }
+
+  .graphic-badge {
+    background: var(--ink-bg-light);
+    border: 1px solid var(--ink-soft);
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 10px;
+  }
+
+  .prompt-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--ink-black);
+    margin: 2px 0 4px 0;
+  }
+
+  .options-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .option-card {
+    border: 1.5px solid var(--ink-border);
+    background: var(--ink-bg-card);
+    border-radius: 10px;
+    padding: 9px 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    min-height: 42px;
+  }
+
+  .option-card:hover {
+    border-color: var(--ink-black);
+    background: #fafbfc;
+  }
+
+  .option-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .option-check {
+    margin-top: 3px;
+    transform: scale(1.3);
+    cursor: pointer;
+    accent-color: var(--ink-black);
+  }
+
+  .letter-tag {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--ink-bg-light);
+    border: 1px solid var(--ink-soft);
+    font-weight: 900;
+    font-size: 12px;
+    color: var(--ink-black);
+    flex-shrink: 0;
+  }
+
+  .option-text {
+    flex: 1;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ink-dark);
+  }
+
+  .option-card.state-good {
+    border: 2px solid var(--ink-black);
+    background: var(--ink-bg-light);
+  }
+  .option-card.state-good .letter-tag {
+    background: var(--ink-black);
+    color: var(--ink-white);
+    border-color: var(--ink-black);
+  }
+
+  .option-card.state-bad {
+    border: 2px dashed var(--ink-black);
+    background: var(--ink-white);
+  }
+
+  .option-card.state-missed {
+    border: 2px solid var(--ink-soft);
+    background: #fdfdfd;
+  }
+
+  .option-rationale {
+    display: none;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--ink-border);
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--ink-dark);
+  }
+
+  .verdict-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+
+  .verdict-tag.vrai {
+    background: var(--ink-black);
+    color: var(--ink-white);
+  }
+
+  .verdict-tag.faux {
+    background: var(--ink-white);
+    color: var(--ink-black);
+    border: 1.5px solid var(--ink-black);
+  }
+
+  .feedback-banner {
+    display: none;
+    border: 2px solid var(--ink-black);
+    border-radius: 10px;
+    padding: 8px 14px;
+    background: var(--ink-white);
+    margin-top: 4px;
+  }
+
+  .feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 900;
+    border-bottom: 1px solid var(--ink-border);
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+  }
+
+  .score-bubble {
+    background: var(--ink-bg-light);
+    border: 1.5px solid var(--ink-black);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .feedback-body {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .action-deck {
+    border-top: 2px solid var(--ink-black);
+    padding-top: 10px;
+    margin-top: 8px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-action {
+    border: 2px solid var(--ink-black);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    cursor: pointer;
+    min-height: 46px;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--ink-black);
+    color: var(--ink-white);
+  }
+
+  .btn-secondary {
+    background: var(--ink-white);
+    color: var(--ink-black);
+  }
+
+  .btn-action:active {
+    outline: 2px solid var(--ink-black);
+  }
+
+  #final-screen {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .grade-card {
+    border: 2.5px solid var(--ink-black);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    background: var(--ink-bg-light);
+  }
+
+  .grade-sup {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ink-mid);
+  }
+
+  .grade-val {
+    font-family: "Georgia", serif;
+    font-size: 46px;
+    font-weight: 900;
+    margin: 2px 0;
+    color: var(--ink-black);
+  }
+
+  .grade-rank {
+    display: inline-block;
+    padding: 3px 14px;
+    border-radius: 14px;
+    background: var(--ink-black);
+    color: var(--ink-white);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .grade-comment {
+    font-size: 13px;
+    font-weight: 600;
+    border-top: 1px dashed var(--ink-border);
+    padding-top: 6px;
+    color: var(--ink-dark);
+  }
+
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1.5px solid var(--ink-black);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 11.5px;
+  }
+
+  .summary-table th, .summary-table td {
+    border: 1px solid var(--ink-border);
+    padding: 5px 8px;
+    text-align: left;
+  }
+
+  .summary-table th {
+    background: var(--ink-black);
+    color: var(--ink-white);
+    font-weight: 800;
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+
+  .summary-table tr:nth-child(even) {
+    background: var(--ink-bg-light);
+  }
+
+  .summary-table td.center {
+    text-align: center;
+    font-weight: 800;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-frame">
+  <header>
+    <div class="nav-top">
+      <div class="brand-badge">
+        <span>★ LCA Masterclass</span>
+        <span style="opacity:0.6;">|</span>
+        <span>Onyx Boox Edition</span>
+      </div>
+      <div class="score-capsule">
+        <span>Score live :</span>
+        <strong id="live-score-val">0.0 / 20</strong>
+      </div>
+    </div>
+    <div class="header-main">
+      <h1>Les Différents Types d'Études Statistiques</h1>
+      <span class="step-counter" id="step-counter">Question 01 / 10</span>
+    </div>
+    <div class="stepper-track" id="stepper-track"></div>
+  </header>
+
+  <div class="question-container" id="question-screen">
+    <div class="category-strip">
+      <span id="theme-label">Thématique Méthodologique</span>
+      <span>Docimologie EDN • 2 pts / item</span>
+    </div>
+
+    <div class="scenario-card" id="scenario-text"></div>
+
+    <div class="graphic-card" id="graphic-card" style="display:none;">
+      <div class="graphic-header">
+        <span id="graphic-title">Figure d'analyse</span>
+        <span class="graphic-badge">Graphique LCA</span>
+      </div>
+      <div id="graphic-svg-wrap" style="width:100%; display:flex; justify-content:center;"></div>
+    </div>
+
+    <div class="prompt-title" id="statement-text"></div>
+
+    <div class="options-stack" id="options-stack"></div>
+
+    <div class="feedback-banner" id="feedback-banner">
+      <div class="feedback-header">
+        <span id="feedback-verdict">Résultat de l'analyse</span>
+        <span class="score-bubble" id="feedback-points">0.0 / 2.0 pts</span>
+      </div>
+      <div class="feedback-body" id="feedback-body"></div>
+    </div>
+  </div>
+
+  <div id="final-screen">
+    <div class="grade-card">
+      <div class="grade-sup">Résultat Officiel d'Épreuve LCA</div>
+      <div class="grade-val" id="final-score-text">-- / 20</div>
+      <div class="grade-rank" id="final-rank-tag">Rang A</div>
+      <div class="grade-comment" id="final-comment-text"></div>
+    </div>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th style="width:34px; text-align:center;">N°</th>
+          <th>Thème méthodologique</th>
+          <th style="text-align:center;">Vos coches</th>
+          <th style="text-align:center;">Attendu</th>
+          <th style="text-align:center;">Note</th>
+        </tr>
+      </thead>
+      <tbody id="summary-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="action-deck">
+    <button type="button" class="btn-action btn-primary" id="main-btn" onclick="onMainAction()">
+      <span>Valider mes réponses</span>
+      <span>→</span>
+    </button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    id: 1,
+    theme: "1. Études Interventionnelles • Définition & Fonctionnement",
+    scenario: "Mise en situation clinique : Vous analysez un essai clinique évaluant un nouveau traitement hypolipémiant par rapport à un placebo. Les patients sont tirés au sort en deux groupes parallèles avec un suivi prospectif de 3 ans.",
+    statement: "Concernant les études interventionnelles selon la fiche de cours, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Une étude est dite interventionnelle lorsque la prise en charge des patients est modifiée par l'étude en introduisant une intervention.",
+        isCorrect: true,
+        justif: "Exact (Section 1). C'est la définition formelle de l'étude interventionnelle."
+      },
+      {
+        letter: "B",
+        text: "Le plus souvent, ces études sont randomisées (cela a toujours été le cas aux épreuves d'ECN/EDN).",
+        isCorrect: true,
+        justif: "Exact (Section 1). La fiche précise que ces études sont le plus souvent randomisées."
+      },
+      {
+        letter: "C",
+        text: "L'un des groupes est assigné au traitement à l'essai et l'autre au traitement contrôle (traitement de référence ou à défaut un placebo).",
+        isCorrect: true,
+        justif: "Exact (Section 1). Le groupe contrôle reçoit la molécule de référence ou un placebo si aucun traitement n'existe."
+      },
+      {
+        letter: "D",
+        text: "Les critères de jugement sont monitorés au cours du suivi pour comparer les deux groupes et déterminer quel traitement est le meilleur.",
+        isCorrect: true,
+        justif: "Exact (Section 1). C'est le déroulement standard de l'essai interventionnel comparatif."
+      },
+      {
+        letter: "E",
+        text: "Une étude interventionnelle est par nature toujours rétrospective car les patients sont sélectionnés sur leur maladie préexistante.",
+        isCorrect: false,
+        justif: "Faux (Section Temporalité). Une étude interventionnelle est TOUJOURS prospective et longitudinale (on introduit l'intervention et on suit les patients dans le temps)."
+      }
+    ]
+  },
+  {
+    id: 2,
+    theme: "2. Études Observationnelles • Les Études de Cohorte",
+    scenario: "Exemple du cours : Une étude sélectionne des sujets consommant des sucres artificiels et d'autres n'en consommant pas, puis les suit dans le temps en monitorant l'incidence du diabète de type 2.",
+    statement: "Concernant les caractéristiques méthodologiques des études de cohorte, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Sur un échantillon de patients, on détermine dès l'inclusion les sujets exposés et non exposés à un potentiel facteur de risque.",
+        isCorrect: true,
+        justif: "Exact (Section 2A). Le point de départ d'une cohorte est la classification des sujets selon leur exposition (exposés vs non exposés)."
+      },
+      {
+        letter: "B",
+        text: "Les patients doivent être obligatoirement indemnes de la maladie étudiée au moment de leur inclusion dans la cohorte.",
+        isCorrect: true,
+        justif: "Exact (Section 2A). Le cours précise textuellement qu'on sélectionne des patients 'indemnes de la maladie' à l'inclusion."
+      },
+      {
+        letter: "C",
+        text: "On suit les sujets dans le temps pour déterminer si les exposés développent plus souvent la maladie que les non-exposés.",
+        isCorrect: true,
+        justif: "Exact (Section 2A). C'est le principe fondateur du suivi longitudinal de cohorte."
+      },
+      {
+        letter: "D",
+        text: "Une étude de cohorte est toujours longitudinale car on part de l'exposition pour arriver à la maladie.",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). On chemine toujours de la cause présumée (exposition) vers l'effet (maladie)."
+      },
+      {
+        letter: "E",
+        text: "Une étude de cohorte ne peut jamais être rétrospective.",
+        isCorrect: false,
+        justif: "Faux (Section Temporalité). Une étude de cohorte peut être prospective OU rétrospective (données préexistantes de dossiers médicaux analysées dans le sens exposition -> maladie)."
+      }
+    ]
+  },
+  {
+    id: 3,
+    theme: "2. Études Observationnelles • Les Études Cas-Témoins",
+    scenario: "Exemple du cours : Des investigateurs sélectionnent des sujets diabétiques et des sujets non diabétiques, puis les interrogent sur leur consommation passée de sucres artificiels.",
+    statement: "Concernant la structure et le fonctionnement des études Cas-Témoins, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "On sélectionne des 'Cas' (patients présentant la maladie étudiée) et des 'Témoins' (patients ne présentant pas la maladie étudiée).",
+        isCorrect: true,
+        justif: "Exact (Section 2B). La constitution des groupes se fait d'emblée selon le statut malade (Cas) ou non-malade (Témoins)."
+      },
+      {
+        letter: "B",
+        text: "Après constitution des groupes, on recherche rétrospectivement leurs expositions passées aux potentiels facteurs de risque.",
+        isCorrect: true,
+        justif: "Exact (Section 2B). L'enquête porte sur les antécédents d'exposition avant la survenue de la maladie."
+      },
+      {
+        letter: "C",
+        text: "Une étude Cas-Témoins est rétrospective par définition, car l'événement (la maladie) s'est déjà produit au moment où débute l'étude.",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). Les sujets sont recrutés alors que la maladie est déjà déclarée."
+      },
+      {
+        letter: "D",
+        text: "Les études Cas-Témoins nécessitent un suivi prospectif prolongé des témoins pour vérifier qu'ils restent indemnes.",
+        isCorrect: false,
+        justif: "Faux (Section 2B). Il n'y a pas de suivi prospectif : l'exposition passée est mesurée rétrospectivement à l'inclusion."
+      },
+      {
+        letter: "E",
+        text: "L'étude Cas-Témoins permet de tester l'association entre une exposition passée et la survenue d'une maladie.",
+        isCorrect: true,
+        justif: "Exact (Section 2B). Exemple des sucres artificiels et du risque de diabète."
+      }
+    ]
+  },
+  {
+    id: 4,
+    theme: "ÉVALUATION GRAPHIQUE • Sens de Recueil : Cohorte vs Cas-Témoins",
+    scenario: "Observation méthodologique : Le schéma ci-dessous compare la démarche d'échantillonnage et le sens de recueil des données entre l'étude de cohorte et l'étude cas-témoins.",
+    statement: "À partir de l'analyse critique de cette figure, quelles sont les propositions exactes ?",
+    graphic: {
+      title: "Figure 1 : Sens de Recueil et Sélection des Groupes (Cohorte vs Cas-Témoins)",
+      svg: `<svg viewBox="0 0 480 165" width="100%" height="160" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif;">
+        <rect x="0" y="0" width="480" height="165" fill="#fafbfc" rx="8"/>
+        <rect x="15" y="12" width="215" height="140" fill="#ffffff" stroke="#24272e" stroke-width="1.5" rx="6"/>
+        <text x="122" y="30" font-size="11" font-weight="900" fill="#111" text-anchor="middle">ÉTUDE DE COHORTE</text>
+        <line x1="25" y1="36" x2="220" y2="36" stroke="#d4d7df" stroke-width="1"/>
+        <rect x="25" y="44" width="195" height="26" fill="#f5f6f9" stroke="#525866" rx="4"/>
+        <text x="122" y="61" font-size="10" font-weight="bold" fill="#111" text-anchor="middle">Point de départ : EXPOSÉS / NON-EXPOSÉS</text>
+        <text x="122" y="94" font-size="16" font-weight="bold" fill="#111" text-anchor="middle">↓ [Suivi dans le temps]</text>
+        <rect x="25" y="112" width="195" height="26" fill="#111" rx="4"/>
+        <text x="122" y="129" font-size="10" font-weight="bold" fill="#fff" text-anchor="middle">Arrivée : MALADIE (Critère de jugement)</text>
+
+        <rect x="250" y="12" width="215" height="140" fill="#ffffff" stroke="#24272e" stroke-width="1.5" rx="6"/>
+        <text x="357" y="30" font-size="11" font-weight="900" fill="#111" text-anchor="middle">ÉTUDE CAS-TÉMOINS</text>
+        <line x1="260" y1="36" x2="455" y2="36" stroke="#d4d7df" stroke-width="1"/>
+        <rect x="260" y="44" width="195" height="26" fill="#111" rx="4"/>
+        <text x="357" y="61" font-size="10" font-weight="bold" fill="#fff" text-anchor="middle">Point de départ : CAS (Malades) / TÉMOINS</text>
+        <text x="357" y="94" font-size="16" font-weight="bold" fill="#111" text-anchor="middle">↑ [Enquête rétrospective]</text>
+        <rect x="260" y="112" width="195" height="26" fill="#f5f6f9" stroke="#525866" rx="4"/>
+        <text x="357" y="129" font-size="10" font-weight="bold" fill="#111" text-anchor="middle">Recherche : EXPOSITION PASSÉE</text>
+      </svg>`
+    },
+    props: [
+      {
+        letter: "A",
+        text: "Dans l'étude de cohorte (gauche), le point de départ est la sélection de sujets selon leur exposition, pour mesurer l'apparition ultérieure de la maladie.",
+        isCorrect: true,
+        justif: "Exact (Section 2A et Figure 1). Le cheminement part de l'exposition vers l'événement."
+      },
+      {
+        letter: "B",
+        text: "Dans l'étude Cas-Témoins (droite), le point de départ est le statut clinique (Cas malades vs Témoins indemnes), pour rechercher l'exposition passée.",
+        isCorrect: true,
+        justif: "Exact (Section 2B et Figure 1). Le sens méthodologique part de la maladie vers l'exposition antérieure."
+      },
+      {
+        letter: "C",
+        text: "L'étude de cohorte est dite longitudinale car elle chemine de l'exposition vers la survenue de la maladie.",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). Aller de l'exposition vers la maladie définit la démarche longitudinale."
+      },
+      {
+        letter: "D",
+        text: "Le schéma démontre que l'étude de cohorte et l'étude cas-témoins sélectionnent leurs sujets sur les mêmes critères initiaux.",
+        isCorrect: false,
+        justif: "Faux (Sections 2A et 2B). La cohorte sélectionne sur l'exposition ; le cas-témoins sélectionne sur la présence de la maladie."
+      },
+      {
+        letter: "E",
+        text: "Dans l'étude Cas-Témoins, les Cas présentent déjà la maladie au moment où l'étude débute.",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). C'est pourquoi l'étude est rétrospective par nature."
+      }
+    ]
+  },
+  {
+    id: 5,
+    theme: "Classification • Études Descriptives versus Analytiques",
+    scenario: "Question de cours : 'Quelle est la distinction fondamentale entre une étude observationnelle descriptive et une étude observationnelle analytique ?'",
+    statement: "Concernant la classification des études observationnelles selon le cours, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Une étude descriptive fournit une 'photo' de l'état de santé de la population ou d'une maladie.",
+        isCorrect: true,
+        justif: "Exact (Section 2). C'est textuellement la définition imagée de l'étude descriptive."
+      },
+      {
+        letter: "B",
+        text: "Une étude analytique vise à tester un lien entre une exposition et le risque de développer une maladie.",
+        isCorrect: true,
+        justif: "Exact (Section 2). L'approche analytique teste une hypothèse d'association statistique."
+      },
+      {
+        letter: "C",
+        text: "Toutes les études observationnelles sont obligatoirement analytiques.",
+        isCorrect: false,
+        justif: "Faux (Section 2). Une étude observationnelle peut être descriptive OU analytique."
+      },
+      {
+        letter: "D",
+        text: "Une étude descriptive compare obligatoirement deux groupes randomisés sous placebo.",
+        isCorrect: false,
+        justif: "Faux (Section 1 et 2). L'étude descriptive est observationnelle (sans randomisation ni placebo)."
+      },
+      {
+        letter: "E",
+        text: "Une étude de cohorte évaluant l'association entre tabagisme et cancer bronchique est une étude analytique.",
+        isCorrect: true,
+        justif: "Exact (Section 2). Elle teste le lien entre une exposition et une pathologie."
+      }
+    ]
+  },
+  {
+    id: 6,
+    theme: "Piège Concours EDN • Études Étiologiques versus Pronostiques",
+    scenario: "Annales ECN 2022 : On sélectionne un échantillon de patients qui sont tous atteints d'insuffisance rénale chronique. On compare une consultation multidisciplinaire versus standard, et le critère de jugement est la survenue d'événements cardiovasculaires.",
+    statement: "Concernant la distinction entre étude étiologique et étude pronostique, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Une étude étiologique vise à tester l'association entre une exposition et le risque de développer une maladie (mise en évidence d'un facteur de risque).",
+        isCorrect: true,
+        justif: "Exact (Section 2). Définition directe de l'étude étiologique."
+      },
+      {
+        letter: "B",
+        text: "Une étude pronostique vise à tester l'association entre une exposition et le risque de développer une complication d'une maladie (mise en évidence d'un facteur pronostique).",
+        isCorrect: true,
+        justif: "Exact (Section 2). Définition directe de l'étude pronostique."
+      },
+      {
+        letter: "C",
+        text: "Pour savoir si une étude est étiologique ou pronostique, la règle d'or consiste à regarder l'état des sujets à l'inclusion : s'ils sont TOUS malades à l'inclusion, c'est une étude pronostique.",
+        isCorrect: true,
+        justif: "Exact (Section 2). C'est la règle d'or explicite de la fiche pour réussir les épreuves de concours."
+      },
+      {
+        letter: "D",
+        text: "Dans une étude pronostique, le critère de jugement principal ne sera pas la survenue de la maladie initiale, mais la survenue d'une complication.",
+        isCorrect: true,
+        justif: "Exact (Section 2). Puisque les patients ont déjà la maladie initiale à l'inclusion, on monitorera ses complications."
+      },
+      {
+        letter: "E",
+        text: "L'exemple de l'ECN 2022 correspond à une étude étiologique car l'insuffisance rénale chronique est un facteur de risque d'infarctus.",
+        isCorrect: false,
+        justif: "Faux (Section 2). Piège ECN 2022 ! Tous les patients sont déjà insuffisants rénaux à l'inclusion : c'est donc une étude PRONOSTIQUE (critère = complication cardiovasculaire)."
+      }
+    ]
+  },
+  {
+    id: 7,
+    theme: "Temporalité des Études • Longitudinal, Transversal, Prospectif & Rétrospectif",
+    scenario: "Question méthodologique : Un article décrit son schéma comme 'une étude transversale observationnelle menée chez 500 travailleurs'.",
+    statement: "Concernant les définitions de la temporalité selon la fiche de cours, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Une étude est dite longitudinale lorsqu'on part de l'intervention ou de l'exposition pour arriver à la maladie.",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). Définition textuelle de la démarche longitudinale."
+      },
+      {
+        letter: "B",
+        text: "Une étude est dite transversale lorsque l'exposition et la maladie sont recueillies au même moment (sans aucun suivi).",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). Définition d'un instantané sans suivi temporel."
+      },
+      {
+        letter: "C",
+        text: "Une étude est dite prospective si au moment où débute l'étude, les événements (maladie) ne sont pas encore survenus (il y a un suivi dans le temps).",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). Définition textuelle du caractère prospectif."
+      },
+      {
+        letter: "D",
+        text: "Une étude est dite rétrospective si au moment où débute l'étude, les événements (maladie) sont déjà survenus.",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). Définition textuelle du caractère rétrospectif."
+      },
+      {
+        letter: "E",
+        text: "Une étude transversale comporte obligatoirement un suivi de 6 mois pour confirmer la persistance des expositions.",
+        isCorrect: false,
+        justif: "Faux (Section Temporalité). Par définition, il n'y a STRICTEMENT AUCUN SUIVI dans une étude transversale."
+      }
+    ]
+  },
+  {
+    id: 8,
+    theme: "ÉVALUATION GRAPHIQUE • Axe Chronologique & Temporalité des Schémas",
+    scenario: "Observation méthodologique : La frise chronologique ci-dessous positionne le moment où débute l'étude ($T_0$) par rapport à la survenue des événements et aux expositions.",
+    statement: "À partir de l'analyse de cette frise chronologique et des règles du cours, quelles sont les propositions exactes ?",
+    graphic: {
+      title: "Figure 2 : Frise Chronologique de la Temporalité des Études Statistiques",
+      svg: `<svg viewBox="0 0 480 165" width="100%" height="160" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif;">
+        <rect x="0" y="0" width="480" height="165" fill="#fafbfc" rx="8"/>
+        <line x1="30" y1="50" x2="450" y2="50" stroke="#24272e" stroke-width="2"/>
+        <polygon points="450,46 460,50 450,54" fill="#24272e"/>
+        <text x="455" y="40" font-size="10" font-weight="bold" fill="#111" text-anchor="end">TEMPS CHRONOLOGIQUE →</text>
+
+        <line x1="240" y1="20" x2="240" y2="155" stroke="#111" stroke-width="2" stroke-dasharray="3,3"/>
+        <rect x="180" y="10" width="120" height="20" fill="#111" rx="4"/>
+        <text x="240" y="24" font-size="10" font-weight="bold" fill="#fff" text-anchor="middle">T0 : DÉBUT DE L'ÉTUDE</text>
+
+        <text x="135" y="40" font-size="10.5" font-weight="900" fill="#525866">← PASSÉ (RÉTROSPECTIF)</text>
+        <text x="345" y="40" font-size="10.5" font-weight="900" fill="#111">FUTUR (PROSPECTIF) →</text>
+
+        <rect x="255" y="65" width="195" height="24" fill="#ffffff" stroke="#111" stroke-width="1.5" rx="4"/>
+        <text x="352" y="81" font-size="9.5" font-weight="bold" fill="#111" text-anchor="middle">Interventionnelle : T0 → Suivi futur</text>
+
+        <rect x="255" y="96" width="195" height="24" fill="#f5f6f9" stroke="#525866" rx="4"/>
+        <text x="352" y="112" font-size="9.5" font-weight="bold" fill="#111" text-anchor="middle">Cohorte prospective : T0 → Suivi futur</text>
+
+        <rect x="30" y="65" width="195" height="24" fill="#ffffff" stroke="#111" stroke-width="1.5" rx="4"/>
+        <text x="127" y="81" font-size="9.5" font-weight="bold" fill="#111" text-anchor="middle">Cas-Témoins : Maladie avant T0</text>
+
+        <rect x="30" y="96" width="195" height="24" fill="#f5f6f9" stroke="#525866" rx="4"/>
+        <text x="127" y="112" font-size="9.5" font-weight="bold" fill="#111" text-anchor="middle">Cohorte rétrospective : Données passées</text>
+
+        <rect x="150" y="128" width="180" height="24" fill="#111" rx="4"/>
+        <text x="240" y="144" font-size="9.5" font-weight="bold" fill="#fff" text-anchor="middle">Transversale : Recueil figé à T0</text>
+      </svg>`
+    },
+    props: [
+      {
+        letter: "A",
+        text: "Une étude interventionnelle est obligatoirement prospective car l'introduction de l'intervention implique forcément un suivi dans le temps pour évaluer le critère.",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité et Figure 2). Elle chemine toujours de T0 vers le futur."
+      },
+      {
+        letter: "B",
+        text: "Une étude de cohorte rétrospective analyse des données médicales préexistantes mais reste longitudinale (on chemine de l'exposition vers la maladie).",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). Bien que rétrospective sur la frise temporelle, elle conserve une orientation logique longitudinale."
+      },
+      {
+        letter: "C",
+        text: "Une étude transversale recueille au même moment T0 le statut malade ou non et les expositions, sans aucun suivi temporel.",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité et Figure 2). Elle constitue un recueil ponctuel figé au moment T0."
+      },
+      {
+        letter: "D",
+        text: "Dans une étude Cas-Témoins, les sujets développent la maladie après le début officiel de l'étude (après T0).",
+        isCorrect: false,
+        justif: "Faux (Section Temporalité). Les cas présentent la maladie AVANT T0 (dans le passé), justifiant le caractère rétrospectif."
+      },
+      {
+        letter: "E",
+        text: "Une étude de cohorte prospective débute à T0 alors que le critère de jugement (la maladie) n'est pas encore survenu.",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). C'est la définition exacte de la cohorte prospective."
+      }
+    ]
+  },
+  {
+    id: 9,
+    theme: "ÉVALUATION GRAPHIQUE • Niveaux de Preuve Scientifique (HAS / ECN)",
+    scenario: "Observation méthodologique : Le diagramme pyramidal ci-dessous classe les schémas d'études selon leur niveau de preuve scientifique selon les recommandations officielles du cours.",
+    statement: "À partir de l'analyse rigoureuse de cette pyramide des preuves, quelles sont les propositions exactes ?",
+    graphic: {
+      title: "Figure 3 : Pyramide des Niveaux de Preuve des Études Statistiques (LCA-ONE)",
+      svg: `<svg viewBox="0 0 480 165" width="100%" height="160" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif;">
+        <rect x="0" y="0" width="480" height="165" fill="#fafbfc" rx="8"/>
+        <polygon points="240,15 150,60 330,60" fill="#111111"/>
+        <text x="240" y="42" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">GRADE A • NIVEAU 1</text>
+        <text x="240" y="54" font-size="8.5" font-weight="bold" fill="#ffffff" text-anchor="middle">Preuve Scientifique Établie</text>
+
+        <polygon points="150,60 330,60 380,110 100,110" fill="#525866"/>
+        <text x="240" y="85" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">GRADE B • NIVEAU 2</text>
+        <text x="240" y="98" font-size="8.5" font-weight="bold" fill="#ffffff" text-anchor="middle">Présomption Scientifique</text>
+
+        <polygon points="100,110 380,110 430,155 50,155" fill="#d4d7df"/>
+        <text x="240" y="132" font-size="10" font-weight="900" fill="#111111" text-anchor="middle">GRADE C • NIVEAUX 3 & 4</text>
+        <text x="240" y="145" font-size="8.5" font-weight="bold" fill="#111111" text-anchor="middle">Faible Niveau de Preuve</text>
+
+        <rect x="345" y="20" width="125" height="34" fill="#fff" stroke="#111" rx="4"/>
+        <text x="407" y="33" font-size="8" font-weight="bold" fill="#111" text-anchor="middle">• Méta-analyses</text>
+        <text x="407" y="45" font-size="8" font-weight="bold" fill="#111" text-anchor="middle">• Essais randomisés forte puiss.</text>
+
+        <rect x="390" y="70" width="85" height="34" fill="#fff" stroke="#525866" rx="4"/>
+        <text x="432" y="83" font-size="8" font-weight="bold" fill="#111" text-anchor="middle">• Cohorte prospective</text>
+        <text x="432" y="95" font-size="8" font-weight="bold" fill="#111" text-anchor="middle">• Essais faible puiss.</text>
+
+        <rect x="5" y="115" width="90" height="34" fill="#fff" stroke="#8a909e" rx="4"/>
+        <text x="50" y="128" font-size="8" font-weight="bold" fill="#111" text-anchor="middle">• Cas-Témoins (Niv 3)</text>
+        <text x="50" y="140" font-size="8" font-weight="bold" fill="#111" text-anchor="middle">• Cohorte rétrospect. (4)</text>
+      </svg>`
+    },
+    props: [
+      {
+        letter: "A",
+        text: "Les méta-analyses d'études interventionnelles et les études randomisées de forte puissance fournissent un niveau de preuve de Grade A (Niveau 1).",
+        isCorrect: true,
+        justif: "Exact (Section Niveaux de preuve). Elles définissent la 'preuve scientifique établie'."
+      },
+      {
+        letter: "B",
+        text: "Les études de cohorte prospectives fournissent un niveau de preuve de Grade B (Niveau 2).",
+        isCorrect: true,
+        justif: "Exact (Section Niveaux de preuve). Elles confèrent une 'présomption scientifique' (Grade B, Niveau 2)."
+      },
+      {
+        letter: "C",
+        text: "Les études Cas-Témoins fournissent un niveau de preuve de Grade C (Niveau 3).",
+        isCorrect: true,
+        justif: "Exact (Section Niveaux de preuve). Elles appartiennent au Grade C, Niveau 3 (faible niveau de preuve)."
+      },
+      {
+        letter: "D",
+        text: "Une étude de cohorte rétrospective fournit un niveau de preuve de Grade C (Niveau 4).",
+        isCorrect: true,
+        justif: "Exact (Section Niveaux de preuve). Moins robuste que la cohorte prospective, elle est classée au Niveau 4."
+      },
+      {
+        letter: "E",
+        text: "Une étude randomisée de faible puissance confère automatiquement un Grade A car elle bénéficie de la randomisation.",
+        isCorrect: false,
+        justif: "Faux (Section Niveaux de preuve). Le manque de puissance déclasse l'étude en Grade B (Niveau 2)."
+      }
+    ]
+  },
+  {
+    id: 10,
+    theme: "Synthèse Globale • Pièges & Hiérarchie Méthodologique",
+    scenario: "Synthèse d'examen : Vous devez classer différents protocoles d'études selon leur robustesse méthodologique et leur classification formelle en LCA.",
+    statement: "En vous basant sur l'ensemble de la fiche de cours, quelles sont les propositions exactes ?",
+    graphic: null,
+    props: [
+      {
+        letter: "A",
+        text: "Une étude interventionnelle est TOUJOURS longitudinale et prospective.",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). Règle absolue : intervention -> suivi tempologique prospectif."
+      },
+      {
+        letter: "B",
+        text: "Une étude de cohorte est TOUJOURS longitudinale, mais peut être prospective OU rétrospective.",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). L'orientation est toujours exposition -> maladie, que les données soient passées ou futures."
+      },
+      {
+        letter: "C",
+        text: "Une étude Cas-Témoins est TOUJOURS rétrospective.",
+        isCorrect: true,
+        justif: "Exact (Section Temporalité). Les cas étant malades d'emblée, l'événement a déjà eu lieu."
+      },
+      {
+        letter: "D",
+        text: "Une étude de cohorte prospective possède un niveau de preuve supérieur à celui d'une étude de cohorte rétrospective (Grade B vs Grade C).",
+        isCorrect: true,
+        justif: "Exact (Section Niveaux de preuve). Cohorte prospective = Niveau 2 ; cohorte rétrospective = Niveau 4."
+      },
+      {
+        letter: "E",
+        text: "Une étude transversale permet d'établir formellement une présomption scientifique de Grade B.",
+        isCorrect: false,
+        justif: "Faux (Section Niveaux de preuve). Les études transversales sans suivi n'atteignent jamais le Grade B."
+      }
+    ]
+  }
+];
+
+let currentIndex = 0;
+let userAnswers = {};
+let questionScores = {};
+let isValidated = false;
+
+function initQuiz() {
+  const track = document.getElementById('stepper-track');
+  track.innerHTML = '';
+  questions.forEach((q, idx) => {
+    const seg = document.createElement('div');
+    seg.className = 'step-seg' + (idx === 0 ? ' active' : '');
+    seg.id = `step-seg-${idx}`;
+    track.appendChild(seg);
+  });
+  renderQuestion(0);
+}
+
+function updateStepper() {
+  questions.forEach((q, idx) => {
+    const seg = document.getElementById(`step-seg-${idx}`);
+    seg.className = 'step-seg';
+    if (idx === currentIndex) {
+      seg.classList.add('active');
+    } else if (questionScores[q.id] !== undefined) {
+      seg.classList.add('done');
+    }
+  });
+}
+
+function updateHeaderScore() {
+  let total = 0;
+  let count = 0;
+  Object.keys(questionScores).forEach(id => {
+    total += questionScores[id];
+    count++;
+  });
+  document.getElementById('live-score-val').innerText = `${total.toFixed(1)} / 20`;
+}
+
+function renderQuestion(index) {
+  currentIndex = index;
+  isValidated = false;
+  const q = questions[index];
+
+  updateStepper();
+  document.getElementById('step-counter').innerText = `Question ${String(index + 1).padStart(2, '0')} / ${questions.length}`;
+  document.getElementById('theme-label').innerText = q.theme;
+  document.getElementById('scenario-text').innerText = q.scenario;
+  document.getElementById('statement-text').innerText = q.statement;
+
+  const graphicCard = document.getElementById('graphic-card');
+  const graphicTitle = document.getElementById('graphic-title');
+  const graphicSvgWrap = document.getElementById('graphic-svg-wrap');
+
+  if (q.graphic) {
+    graphicCard.style.display = 'flex';
+    graphicTitle.innerText = q.graphic.title;
+    graphicSvgWrap.innerHTML = q.graphic.svg;
+  } else {
+    graphicCard.style.display = 'none';
+    graphicSvgWrap.innerHTML = '';
+  }
+
+  document.getElementById('feedback-banner').style.display = 'none';
+
+  const stack = document.getElementById('options-stack');
+  stack.innerHTML = '';
+
+  q.props.forEach((prop, pIdx) => {
+    const card = document.createElement('label');
+    card.className = 'option-card';
+    card.id = `opt-card-${pIdx}`;
+
+    card.innerHTML = `
+      <div class="option-row">
+        <input type="checkbox" name="q_${q.id}" value="${pIdx}" class="option-check" id="chk-${pIdx}">
+        <span class="letter-tag">${prop.letter}</span>
+        <span class="option-text">${prop.text}</span>
+      </div>
+      <div class="option-rationale" id="rationale-${pIdx}">
+        <span class="verdict-tag ${prop.isCorrect ? 'vrai' : 'faux'}">${prop.isCorrect ? '✔ VRAI' : '✘ FAUX'}</span>
+        ${prop.justif}
+      </div>
+    `;
+    stack.appendChild(card);
+  });
+
+  const btn = document.getElementById('main-btn');
+  btn.innerHTML = `<span>Valider mes réponses</span> <span>→</span>`;
+  btn.className = 'btn-action btn-primary';
+
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function evaluateCurrentQuestion() {
+  const q = questions[currentIndex];
+  const checks = document.querySelectorAll(`input[name="q_${q.id}"]`);
+  const selected = [];
+
+  checks.forEach(cb => {
+    if (cb.checked) selected.push(parseInt(cb.value, 10));
+    cb.disabled = true;
+  });
+
+  userAnswers[q.id] = selected;
+
+  let discordances = 0;
+  q.props.forEach((prop, pIdx) => {
+    const isChecked = selected.includes(pIdx);
+    const card = document.getElementById(`opt-card-${pIdx}`);
+    const rationale = document.getElementById(`rationale-${pIdx}`);
+
+    rationale.style.display = 'block';
+
+    if (isChecked === prop.isCorrect) {
+      if (isChecked) card.classList.add('state-good');
+    } else {
+      discordances++;
+      if (isChecked && !prop.isCorrect) card.classList.add('state-bad');
+      else if (!isChecked && prop.isCorrect) card.classList.add('state-missed');
+    }
+  });
+
+  let pts = 0;
+  let verdict = "";
+  if (discordances === 0) {
+    pts = 2.0;
+    verdict = "Accord Parfait (0 erreur)";
+  } else if (discordances === 1) {
+    pts = 1.0;
+    verdict = "1 Discordance constatée";
+  } else if (discordances === 2) {
+    pts = 0.4;
+    verdict = "2 Discordances constatées";
+  } else {
+    pts = 0.0;
+    verdict = `${discordances} Discordances (Seuil éliminatoire)`;
+  }
+
+  questionScores[q.id] = pts;
+  updateHeaderScore();
+  updateStepper();
+
+  const banner = document.getElementById('feedback-banner');
+  const fVerdict = document.getElementById('feedback-verdict');
+  const fPoints = document.getElementById('feedback-points');
+  const fBody = document.getElementById('feedback-body');
+
+  fVerdict.innerText = verdict;
+  fPoints.innerText = `${pts.toFixed(1)} / 2.0 pts`;
+
+  const trueLetters = q.props.filter(p => p.isCorrect).map(p => p.letter).join(", ");
+  fBody.innerHTML = `<strong>Réponses attendues :</strong> [ ${trueLetters} ].<br>Consultez ci-dessus l'analyse méthodologique détaillée pour chaque proposition.`;
+
+  banner.style.display = 'block';
+
+  isValidated = true;
+  const btn = document.getElementById('main-btn');
+  if (currentIndex < questions.length - 1) {
+    btn.innerHTML = `<span>Passer à la question suivante (${currentIndex + 2}/10)</span> <span>→</span>`;
+  } else {
+    btn.innerHTML = `<span>Découvrir ma note finale sur 20</span> <span>★</span>`;
+  }
+}
+
+function onMainAction() {
+  if (!isValidated) {
+    evaluateCurrentQuestion();
+  } else {
+    if (currentIndex < questions.length - 1) {
+      renderQuestion(currentIndex + 1);
+    } else {
+      renderFinalScreen();
+    }
+  }
+}
+
+function renderFinalScreen() {
+  document.getElementById('question-screen').style.display = 'none';
+  document.getElementById('final-screen').style.display = 'flex';
+  document.getElementById('step-counter').innerText = "Épreuve Complétée";
+
+  let total = 0;
+  questions.forEach(q => {
+    total += (questionScores[q.id] || 0);
+  });
+
+  document.getElementById('final-score-text').innerText = `${total.toFixed(1)} / 20`;
+
+  const rankTag = document.getElementById('final-rank-tag');
+  const commentEl = document.getElementById('final-comment-text');
+
+  if (total >= 18) {
+    rankTag.innerText = "Rang A • Excellence Méthodologique";
+    commentEl.innerText = "Performance exceptionnelle ! Vous maîtrisez parfaitement les classifications d'études, les temporalités, la distinction étiologique/pronostique et la pyramide des niveaux de preuve.";
+  } else if (total >= 14) {
+    rankTag.innerText = "Rang A-B • Très Bon Niveau";
+    commentEl.innerText = "L'essentiel de la méthodologie est acquis. Analysez les quelques discordances résiduelles pour viser le 20/20 au concours.";
+  } else if (total >= 10) {
+    rankTag.innerText = "Rang B • Niveau Moyen";
+    commentEl.innerText = "Des confusions persistent, notamment sur la temporalité (longitudinal vs transversal) ou les niveaux de preuve.";
+  } else {
+    rankTag.innerText = "Rang C • À retravailler";
+    commentEl.innerText = "Une relecture active de la fiche s'impose, en insistant sur la règle d'or d'inclusion (étiologique vs pronostique) et la hiérarchie HAS.";
+  }
+
+  const tbody = document.getElementById('summary-tbody');
+  tbody.innerHTML = '';
+  questions.forEach(q => {
+    const tr = document.createElement('tr');
+    const uChoices = (userAnswers[q.id] || []).map(i => q.props[i].letter).join(", ") || "—";
+    const cChoices = q.props.filter(p => p.isCorrect).map(p => p.letter).join(", ");
+    const pts = (questionScores[q.id] || 0).toFixed(1);
+
+    tr.innerHTML = `
+      <td class="center"><strong>Q${q.id}</strong></td>
+      <td>${q.theme}</td>
+      <td class="center">${uChoices}</td>
+      <td class="center"><strong>${cChoices}</strong></td>
+      <td class="center">${pts} / 2</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const btn = document.getElementById('main-btn');
+  btn.innerHTML = `<span>Recommencer l'épreuve à zéro</span> <span>↺</span>`;
+  btn.className = 'btn-action btn-secondary';
+  btn.onclick = () => {
+    userAnswers = {};
+    questionScores = {};
+    document.getElementById('final-screen').style.display = 'none';
+    document.getElementById('question-screen').style.display = 'flex';
+    btn.onclick = onMainAction;
+    initQuiz();
+  };
+
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+document.addEventListener('DOMContentLoaded', initQuiz);
+</script>
+
+</body>
+</html>
