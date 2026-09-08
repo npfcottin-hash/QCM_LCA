@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz LCA — Différentes manières d'analyser les données</title>
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  body {
+    margin: 0;
+    padding: 24px 16px;
+    background-color: #ffffff;
+    color: #000000;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .quiz-wrapper {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .top-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13.5px;
+    color: #555555;
+    margin-bottom: 6px;
+  }
+
+  .progress-line-container {
+    width: 100%;
+    height: 3px;
+    background-color: #e0e0e0;
+    margin-bottom: 26px;
+  }
+
+  .progress-line-fill {
+    height: 100%;
+    background-color: #555555;
+    width: 0%;
+  }
+
+  .question-box {
+    border: 2px solid #000000;
+    padding: 30px 32px;
+    background-color: #ffffff;
+    margin-bottom: 22px;
+  }
+
+  .q-title {
+    font-size: 18.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #000000;
+    margin: 0 0 6px 0;
+  }
+
+  .q-sub {
+    font-size: 13px;
+    color: #666666;
+    margin: 0 0 22px 0;
+  }
+
+  .options-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .option-item {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 13px 0;
+    cursor: pointer;
+  }
+
+  .option-item:last-child {
+    border-bottom: none;
+    padding-bottom: 4px;
+  }
+
+  .option-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .option-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .custom-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #000000;
+    background-color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .option-input:checked + .custom-checkbox {
+    background-color: #000000;
+  }
+
+  .option-input:checked + .custom-checkbox::after {
+    content: "✔";
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .option-text {
+    font-size: 14.5px;
+    color: #000000;
+    line-height: 1.35;
+    flex: 1;
+  }
+
+  .option-feedback {
+    display: none;
+    margin-top: 8px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    background-color: #f6f6f6;
+    border-left: 3px solid #000000;
+  }
+
+  .tag-verdict {
+    display: inline-block;
+    font-weight: 900;
+    font-size: 11px;
+    text-transform: uppercase;
+    margin-right: 6px;
+    padding: 1px 5px;
+  }
+
+  .tag-verdict.vrai {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  .tag-verdict.faux {
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #000000;
+  }
+
+  .q-summary-feedback {
+    display: none;
+    border-top: 2px solid #000000;
+    margin-top: 18px;
+    padding-top: 12px;
+    font-size: 13px;
+  }
+
+  .q-score-banner {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .btn {
+    border-radius: 0;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    min-height: 42px;
+    padding: 10px 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-prev {
+    background-color: #ffffff;
+    border: 1px solid #a0a0a0;
+    color: #666666;
+  }
+
+  .btn-prev:disabled {
+    border-color: #e0e0e0;
+    color: #cccccc;
+    cursor: default;
+  }
+
+  .btn-next {
+    background-color: #000000;
+    border: 1px solid #000000;
+    color: #ffffff;
+    font-weight: 700;
+    min-width: 120px;
+  }
+
+  .btn:active {
+    outline: 2px solid #000000;
+  }
+
+  #final-screen {
+    display: none;
+    border: 2px solid #000000;
+    padding: 30px;
+    background-color: #ffffff;
+    text-align: center;
+    margin-bottom: 22px;
+  }
+
+  .final-score-title {
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #666666;
+    letter-spacing: 0.5px;
+  }
+
+  .final-score-number {
+    font-size: 48px;
+    font-weight: 900;
+    margin: 6px 0;
+    color: #000000;
+  }
+
+  .final-eval-text {
+    font-size: 14px;
+    margin-bottom: 20px;
+    color: #222222;
+  }
+
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 18px;
+    text-align: left;
+    font-size: 12.5px;
+  }
+
+  .results-table th, .results-table td {
+    border: 1px solid #000000;
+    padding: 6px 8px;
+  }
+
+  .results-table th {
+    background-color: #000000;
+    color: #ffffff;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="quiz-wrapper">
+  <div class="top-meta">
+    <span id="progress-step-text">Question 1 sur 10</span>
+    <span id="progress-pct-text">0%</span>
+  </div>
+  <div class="progress-line-container">
+    <div class="progress-line-fill" id="progress-line"></div>
+  </div>
+
+  <div class="question-box" id="question-card">
+    <div class="q-title" id="q-title">Chargement de la question...</div>
+    <div class="q-sub" id="q-sub">Une ou plusieurs bonnes réponses.</div>
+
+    <div class="options-list" id="options-container"></div>
+
+    <div class="q-summary-feedback" id="q-summary-feedback">
+      <div class="q-score-banner">
+        <span id="q-verdict-title">Résultat</span>
+        <span id="q-points-label">0.0 / 2.0 pts</span>
+      </div>
+      <div id="q-feedback-text" style="color: #444444;"></div>
+    </div>
+  </div>
+
+  <div id="final-screen">
+    <div class="final-score-title">Note Finale de LCA</div>
+    <div class="final-score-number" id="final-score-val">-- / 20</div>
+    <div class="final-eval-text" id="final-eval-msg"></div>
+
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th style="width:36px; text-align:center;">N°</th>
+          <th>Thème</th>
+          <th style="text-align:center;">Vos réponses</th>
+          <th style="text-align:center;">Attendu</th>
+          <th style="text-align:center;">Note</th>
+        </tr>
+      </thead>
+      <tbody id="final-summary-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="nav-bar">
+    <button type="button" class="btn btn-prev" id="btn-prev" onclick="goToPrevious()">← Précédent</button>
+    <button type="button" class="btn btn-next" id="btn-action" onclick="handleMainAction()">Valider</button>
+  </div>
+</div>
+
+<script>
+const questionsData = [
+  {
+    id: 1,
+    title: "Dans une analyse en Intention de Traiter (ITT), comment les patients sont-ils analysés ?",
+    sub: "Une ou plusieurs bonnes réponses.",
+    options: [
+      {
+        text: "Selon le traitement qu'ils ont réellement reçu au cours de l'essai.",
+        isCorrect: false,
+        why: "Faux (Section 1). Cela correspond à l'analyse en 'traitement reçu', qui casse la randomisation."
+      },
+      {
+        text: "Dans le groupe où ils ont été randomisés, quel que soit le traitement reçu et qu'ils soient perdus de vue ou non.",
+        isCorrect: true,
+        why: "Exact (Section 1). Définition cardinale de l'ITT : tous les sujets randomisés, dans leur groupe de randomisation."
+      },
+      {
+        text: "Uniquement s'ils ont suivi le protocole à la lettre sans aucune déviation.",
+        isCorrect: false,
+        why: "Faux (Section 2). C'est la définition de l'analyse Per Protocole."
+      },
+      {
+        text: "Uniquement à partir du moment où ils ont pris au moins une fois le traitement.",
+        isCorrect: false,
+        why: "Faux (Section 4). C'est la définition de la 'Full Set Analysis'."
+      },
+      {
+        text: "En excluant les perdus de vue pour éviter d'introduire des données incertaines.",
+        isCorrect: false,
+        why: "Faux (Section 1). L'ITT analyse les patients qu'importe s'ils sont perdus de vue ou non."
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "Pourquoi l'analyse en Intention de Traiter est-elle recommandée pour les essais de supériorité ?",
+    sub: "Une ou plusieurs bonnes réponses.",
+    options: [
+      {
+        text: "Parce qu'elle est la plus conservatrice en ayant tendance à minimiser les différences entre les groupes.",
+        isCorrect: true,
+        why: "Exact (Section 1). La contamination entre les groupes dilue l'écart et minimise les différences."
+      },
+      {
+        text: "Parce qu'elle maintient le bénéfice de l'assignation aléatoire obtenue grâce à la randomisation.",
+        isCorrect: true,
+        why: "Exact (Section 1). Elle préserve la comparabilité initiale des groupes constitués au départ."
+      },
+      {
+        text: "Parce qu'elle majore artificiellement les différences d'efficacité pour maximiser la puissance.",
+        isCorrect: false,
+        why: "Faux (Section 1). L'ITT minimise au contraire les différences (approche conservatrice)."
+      },
+      {
+        text: "Parce que si l'on montre une différence significative malgré la contamination, on est d'autant plus confiant sur son existence réelle dans la population.",
+        isCorrect: true,
+        why: "Exact (Section 1). Le résultat résiste à la dilution conservatrice."
+      },
+      {
+        text: "Parce qu'elle évite le biais d'attrition lié à l'exclusion des perdus de vue.",
+        isCorrect: true,
+        why: "Exact (Section 1). En intégrant l'ensemble des inclus, l'ITT neutralise l'attrition."
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "Concernant le biais d'attrition des perdus de vue, quelles sont les affirmations exactes ?",
+    sub: "Une ou plusieurs bonnes réponses.",
+    options: [
+      {
+        text: "Il s'agit d'un type de biais de sélection lié à l'exclusion des patients perdus de vue lors de l'analyse.",
+        isCorrect: true,
+        why: "Exact (Section 1). L'exclusion post-randomisation génère un biais de sélection."
+      },
+      {
+        text: "Il risque de surestimer l'efficacité d'un traitement en ne gardant que les patients chez qui le traitement marche.",
+        isCorrect: true,
+        why: "Exact (Section 1). Les patients intolérants ou en échec sont souvent éliminés prématurément."
+      },
+      {
+        text: "Les patients ne sont généralement pas perdus de vue au hasard dans les essais cliniques.",
+        isCorrect: true,
+        why: "Exact (Section 1). L'abandon est souvent corrélé à l'inefficacité ou aux effets indésirables."
+      },
+      {
+        text: "L'analyse Per Protocole évite totalement le biais d'attrition des perdus de vue.",
+        isCorrect: false,
+        why: "Faux (Section 2). L'analyse Per Protocole exclut les perdus de vue, donc elle PROVOQUE le biais d'attrition."
+      },
+      {
+        text: "Pour vérifier qu'une analyse est une vraie ITT, le nombre de sujets randomisés doit être égal au nombre de sujets analysés sur le Flow Chart.",
+        isCorrect: true,
+        why: "Exact (Section 1). Règle de contrôle formelle face aux fausses ITT."
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: "Exemple du cours : 102 patients randomisés sous Aspirine (12 prennent de l'Homéopathie, 8 perdus de vue) et 106 sous Homéopathie (26 prennent de l'Aspirine, 14 perdus de vue). En analyse en ITT :",
+    sub: "Une ou plusieurs bonnes réponses.",
+    options: [
+      {
+        text: "On analyse exactement 102 patients dans le groupe Aspirine et 106 patients dans le groupe Homéopathie.",
+        isCorrect: true,
+        why: "Exact (Section 1). Tous les randomisés sont analysés dans leur groupe d'assignation initial."
+      },
+      {
+        text: "Les 12 patients du groupe Aspirine ayant pris de l'Homéopathie sont transférés dans le groupe Homéopathie.",
+        isCorrect: false,
+        why: "Faux (Section 1). En ITT, les patients restent dans leur groupe de randomisation qu'importe leur prise réelle."
+      },
+      {
+        text: "Les 8 perdus de vue du bras Aspirine et les 14 du bras Homéopathie sont exclus de l'analyse finale.",
+        isCorrect: false,
+        why: "Faux (Section 1). En ITT, les perdus de vue sont conservés et font l'objet d'une imputation."
+      },
+      {
+        text: "Dans une analyse selon le 'Traitement reçu', le groupe ayant pris de l'Aspirine comprendrait 116 patients (90 + 26).",
+        isCorrect: true,
+        why: "Exact (Sections 1 et 3). 90 patients observants du bras Aspirine + 26 contaminés du bras Homéopathie = 116."
+      },
+      {
+        text: "Cette situation illustre le phénomène de contamination croisée entre les deux bras.",
+        isCorrect: true,
+        why: "Exact (Section 1). Des patients de chaque groupe ont consommé le traitement du bras opposé."
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: "Concernant la méthode du « Pire scénario » (hypothèse du biais maximum) pour l'imputation :",
+    sub: "Une ou plusieurs bonnes réponses.",
+    options: [
+      {
+        text: "Elle est classée parmi les méthodes recommandées pour l'imputation des données manquantes.",
+        isCorrect: true,
+        why: "Exact (Méthodes d'imputation). Recommandée comme analyse de sensibilité conservatrice."
+      },
+      {
+        text: "Dans le bras intervention, on considère que tous les perdus de vue ont fait l'événement clinique.",
+        isCorrect: true,
+        why: "Exact (Méthodes d'imputation). On pénalise au maximum le bras intervention (échec complet)."
+      },
+      {
+        text: "Dans le bras contrôle, on considère qu'aucun perdu de vue n'a fait l'événement clinique.",
+        isCorrect: true,
+        why: "Exact (Méthodes d'imputation). On favorise au maximum le bras contrôle (succès complet)."
+      },
+      {
+        text: "Si le bras intervention reste significativement supérieur au contrôle malgré cette imputation, l'efficacité est particulièrement robuste.",
+        isCorrect: true,
+        why: "Exact (Méthodes d'imputation). La preuve résiste à la pénalisation maximale."
+      },
+      {
+        text: "Cette méthode attribue le résultat de la dernière visite enregistrée pour chaque patient.",
+        isCorrect: false,
+        why: "Faux (Méthodes d'imputation). Cela correspond à la méthode LOCF, non au pire scénario."
+      }
+    ]
+  },
+  {
+    id: 6,
+    title: "Concernant la méthode LOCF (Last Observation Carried Forward) d'imputation des données :",
+    sub: "Une ou plusieurs bonnes réponses.",
+    options: [
+      {
+        text: "Elle attribue le critère principal selon l'état du patient lors de sa dernière visite.",
+        isCorrect: true,
+        why: "Exact (Méthode non recommandée). Définition exacte du mécanisme de la LOCF."
+      },
+      {
+        text: "Elle est classée parmi les méthodes NON recommandées en LCA.",
+        isCorrect: true,
+        why: "Exact (Méthode non recommandée). Elle introduit un biais systématique favorable à l'essai."
+      },
+      {
+        text: "Elle est déconseillée car les patients sous traitement à l'essai sont souvent perdus de vue plus rapidement (effets indésirables).",
+        isCorrect: true,
+        why: "Exact (Méthode non recommandée). La toxicité entraîne des sorties précoces de protocole."
+      },
+      {
+        text: "En sortant plus vite, les patients du bras essai ont moins de temps de suivi pour développer l'événement, ce qui biaise l'analyse en faveur du traitement à l'essai.",
+        isCorrect: true,
+        why: "Exact (Méthode non recommandée). Moins de suivi = moins d'événements comptabilisés lors de la dernière visite."
+      },
+      {
+        text: "La méthode LOCF est la méthode de référence imposée pour les imputations multiples.",
+        isCorrect: false,
+        why: "Faux (Méthodes d'imputation). Les imputations multiples sont une méthode distincte et recommandée."
+      }
+    ]
+  },
+  {
+    id: 7,
+    title: "Concernant les imputations multiples pour les données manquantes selon le cours :",
+    sub: "Une ou plusieurs bonnes réponses.",
+    options: [
+      {
+        text: "Il s'agit d'une méthode d'imputation recommandée par le cours.",
+        isCorrect: true,
+        why: "Exact (Méthodes d'imputation). Classée textuellement parmi les méthodes recommandées."
+      },
+      {
+        text: "L'attribution du critère de jugement aux perdus de vue dépend de leurs caractéristiques comparées à celles des patients non perdus de vue du même groupe.",
+        isCorrect: true,
+        why: "Exact (Méthodes d'imputation). C'est le principe statistique de l'imputation multiple conditionnelle."
+      },
+      {
+        text: "Elle consiste à exclure systématiquement tous les patients inobservants.",
+        isCorrect: false,
+        why: "Faux (Méthodes d'imputation). Elle modélise les données manquantes au lieu d'exclure les sujets."
+      },
+      {
+        text: "Elle attribue arbitrairement un événement défavorable à 100 % des patients des deux groupes.",
+        isCorrect: false,
+        why: "Faux (Méthodes d'imputation). Cela ne correspond pas au modèle des imputations multiples."
+      },
+      {
+        text: "Elle permet de conserver la totalité des patients randomisés au sein de l'analyse en ITT.",
+        isCorrect: true,
+        why: "Exact (Section 1). Elle permet de traiter l'ensemble de la cohorte randomisée."
+      }
+    ]
+  },
+  {
+    id: 8,
+    title: "Concernant l'analyse en Per Protocole (PP) selon la fiche de cours :",
+    sub: "Une ou plusieurs bonnes réponses.",
+    options: [
+      {
+        text: "Elle analyse les patients dans leur groupe uniquement s'ils ont suivi le protocole à la lettre.",
+        isCorrect: true,
+        why: "Exact (Section 2). Définition textuelle de l'analyse Per Protocole."
+      },
+      {
+        text: "Elle exclut tous les perdus de vue, ce qui induit un biais d'attrition des perdus de vue.",
+        isCorrect: true,
+        why: "Exact (Section 2). L'exclusion sélective brise la randomisation et crée un biais d'attrition."
+      },
+      {
+        text: "Elle exclut toutes les déviations au protocole.",
+        isCorrect: true,
+        why: "Exact (Section 2). Les inobservants et contaminés sont éliminés de l'analyse."
+      },
+      {
+        text: "Elle majore les différences entre les groupes car il n'y a pas de contamination.",
+        isCorrect: true,
+        why: "Exact (Section 2). Sans dilution par contamination, l'écart observé entre les groupes est maximal."
+      },
+      {
+        text: "Dans un essai de supériorité, elle représente l'analyse la plus conservatrice.",
+        isCorrect: false,
+        why: "Faux (Section 2). Pour la supériorité, elle est la MOINS conservatrice (elle majore artificiellement l'écart)."
+      }
+    ]
+  },
+  {
+    id: 9,
+    title: "Dans un essai clinique de Non-Infériorité, quelles sont les règles méthodologiques d'analyse ?",
+    sub: "Une ou plusieurs bonnes réponses.",
+    options: [
+      {
+        text: "L'hypothèse à exclure est l'infériorité du traitement à l'essai par rapport au contrôle.",
+        isCorrect: true,
+        why: "Exact (Section 2). L'objectif est de rejeter l'hypothèse d'une perte d'efficacité au-delà de la marge."
+      },
+      {
+        text: "L'analyse en Per Protocole est l'analyse la plus conservatrice pour un essai de non-infériorité.",
+        isCorrect: true,
+        why: "Exact (Section 2). Comme elle maximise les écarts, elle est la plus stricte pour prouver qu'il n'y a pas d'infériorité."
+      },
+      {
+        text: "Une analyse uniquement en ITT risque de conclure à tort à la non-infériorité en minimisant les différences par contamination.",
+        isCorrect: true,
+        why: "Exact (Section 2). Rapprocher artificiellement les deux bras vers 0 fait faussement croire à une équivalence."
+      },
+      {
+        text: "Dans un essai de non-infériorité, on doit obligatoirement réaliser les deux analyses : en ITT et en Per Protocole.",
+        isCorrect: true,
+        why: "Exact (Section 2). L'ITT maintient la randomisation et le Per Protocole apporte la conservativité."
+      },
+      {
+        text: "Dans l'idéal, les résultats des analyses en ITT et en Per Protocole doivent être concordants.",
+        isCorrect: true,
+        why: "Exact (Section 2). La concordance des deux analyses valide solidement la non-infériorité."
+      }
+    ]
+  },
+  {
+    id: 10,
+    title: "Concernant l'analyse en « Traitement Reçu » et la « Full Set Analysis » :",
+    sub: "Une ou plusieurs bonnes réponses.",
+    options: [
+      {
+        text: "L'analyse en Traitement Reçu analyse les patients selon ce qu'ils ont réellement pris, qu'importe leur groupe de randomisation.",
+        isCorrect: true,
+        why: "Exact (Section 3). Définition mot à mot de l'analyse As-Treated."
+      },
+      {
+        text: "L'analyse en Traitement Reçu est très rarement utilisée en pratique.",
+        isCorrect: true,
+        why: "Exact (Section 3). La fiche précise textuellement qu'elle est 'rarement utilisée'."
+      },
+      {
+        text: "La Full Set Analysis analyse les patients dans leur groupe de randomisation dès lors qu'ils ont pris au moins une fois le traitement.",
+        isCorrect: true,
+        why: "Exact (Section 4). Définition exacte de la Full Set Analysis."
+      },
+      {
+        text: "La Full Set Analysis est typiquement utilisée pour l'analyse des données de tolérance et de sécurité.",
+        isCorrect: true,
+        why: "Exact (Section 4). Utilisée pour évaluer la sécurité dès la première exposition au produit."
+      },
+      {
+        text: "Dans un essai de non-infériorité, peu importe laquelle entre l'ITT et le Per Protocole est désignée analyse principale ou analyse de sensibilité.",
+        isCorrect: true,
+        why: "Exact (Section 2). La fiche mentionne textuellement : 'qu'importe laquelle est désignée analyse principale et laquelle est désignée analyse de sensibilité'."
+      }
+    ]
+  }
+];
+
+let currentIndex = 0;
+let userSelections = {};
+let validatedQuestions = {};
+let questionScores = {};
+
+function initQuiz() {
+  currentIndex = 0;
+  userSelections = {};
+  validatedQuestions = {};
+  questionScores = {};
+  renderCurrentQuestion();
+}
+
+function updateProgressBar() {
+  const total = questionsData.length;
+  const pct = Math.round((currentIndex / total) * 100);
+  document.getElementById('progress-step-text').innerText = `Question ${currentIndex + 1} sur ${total}`;
+  document.getElementById('progress-pct-text').innerText = `${pct}%`;
+  document.getElementById('progress-line').style.width = `${pct}%`;
+}
+
+function renderCurrentQuestion() {
+  updateProgressBar();
+
+  const q = questionsData[currentIndex];
+  document.getElementById('q-title').innerText = q.title;
+  document.getElementById('q-sub').innerText = q.sub;
+
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+
+  const isAlreadyValidated = !!validatedQuestions[q.id];
+  const userChecked = userSelections[q.id] || [];
+
+  q.options.forEach((opt, idx) => {
+    const isChecked = userChecked.includes(idx);
+
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'option-item';
+    itemDiv.id = `opt-item-${idx}`;
+
+    itemDiv.innerHTML = `
+      <label class="option-label" for="opt-input-${idx}">
+        <input type="checkbox" class="option-input" id="opt-input-${idx}" value="${idx}" 
+               ${isChecked ? 'checked' : ''} ${isAlreadyValidated ? 'disabled' : ''} 
+               onchange="onCheckboxChange(${idx})">
+        <span class="custom-checkbox"></span>
+        <span class="option-text">${opt.text}</span>
+      </label>
+      <div class="option-feedback" id="opt-feedback-${idx}">
+        <span class="tag-verdict ${opt.isCorrect ? 'vrai' : 'faux'}">${opt.isCorrect ? 'VRAI' : 'FAUX'}</span>
+        <span>${opt.why}</span>
+      </div>
+    `;
+
+    container.appendChild(itemDiv);
+  });
+
+  const btnPrev = document.getElementById('btn-prev');
+  const btnAction = document.getElementById('btn-action');
+
+  btnPrev.disabled = (currentIndex === 0);
+
+  const summaryBox = document.getElementById('q-summary-feedback');
+
+  if (isAlreadyValidated) {
+    showFeedbacksForQuestion(q);
+    summaryBox.style.display = 'block';
+    btnAction.innerText = (currentIndex === questionsData.length - 1) ? 'Terminer →' : 'Suivant →';
+  } else {
+    summaryBox.style.display = 'none';
+    btnAction.innerText = 'Valider';
+  }
+
+  document.getElementById('final-screen').style.display = 'none';
+  document.getElementById('question-card').style.display = 'block';
+
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function onCheckboxChange(optIdx) {
+  const q = questionsData[currentIndex];
+  const inputs = document.querySelectorAll('.option-input:checked');
+  const selected = [];
+  inputs.forEach(inp => selected.push(parseInt(inp.value, 10)));
+  userSelections[q.id] = selected;
+}
+
+function handleMainAction() {
+  const q = questionsData[currentIndex];
+  const isValidated = !!validatedQuestions[q.id];
+
+  if (!isValidated) {
+    validateCurrentQuestion();
+  } else {
+    if (currentIndex < questionsData.length - 1) {
+      currentIndex++;
+      renderCurrentQuestion();
+    } else {
+      showFinalScreen();
+    }
+  }
+}
+
+function validateCurrentQuestion() {
+  const q = questionsData[currentIndex];
+  const inputs = document.querySelectorAll('.option-input:checked');
+  const selected = [];
+  inputs.forEach(inp => {
+    selected.push(parseInt(inp.value, 10));
+    inp.disabled = true;
+  });
+
+  userSelections[q.id] = selected;
+  validatedQuestions[q.id] = true;
+
+  let discordances = 0;
+  q.options.forEach((opt, idx) => {
+    const wasChecked = selected.includes(idx);
+    if (wasChecked !== opt.isCorrect) {
+      discordances++;
+    }
+  });
+
+  let pts = 0;
+  let verdict = "";
+  if (discordances === 0) {
+    pts = 2.0;
+    verdict = "Accord Parfait (0 erreur)";
+  } else if (discordances === 1) {
+    pts = 1.0;
+    verdict = "1 Discordance (1 erreur)";
+  } else if (discordances === 2) {
+    pts = 0.4;
+    verdict = "2 Discordances (2 erreurs)";
+  } else {
+    pts = 0.0;
+    verdict = `${discordances} Discordances (Seuil éliminatoire)`;
+  }
+
+  questionScores[q.id] = pts;
+
+  showFeedbacksForQuestion(q);
+
+  const summaryBox = document.getElementById('q-summary-feedback');
+  document.getElementById('q-verdict-title').innerText = verdict;
+  document.getElementById('q-points-label').innerText = `${pts.toFixed(1)} / 2.0 pts`;
+  
+  const trueList = q.options.filter(o => o.isCorrect).map(o => `« ${o.text} »`).join("<br>• ");
+  document.getElementById('q-feedback-text').innerHTML = `<strong>Réponse(s) exacte(s) attendue(s) :</strong><br>• ${trueList}`;
+  summaryBox.style.display = 'block';
+
+  const btnAction = document.getElementById('btn-action');
+  btnAction.innerText = (currentIndex === questionsData.length - 1) ? 'Terminer →' : 'Suivant →';
+}
+
+function showFeedbacksForQuestion(q) {
+  q.options.forEach((opt, idx) => {
+    const fb = document.getElementById(`opt-feedback-${idx}`);
+    if (fb) fb.style.display = 'block';
+  });
+}
+
+function goToPrevious() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderCurrentQuestion();
+  }
+}
+
+function showFinalScreen() {
+  document.getElementById('question-card').style.display = 'none';
+  const finalScreen = document.getElementById('final-screen');
+  finalScreen.style.display = 'block';
+
+  document.getElementById('progress-step-text').innerText = "Épreuve terminée";
+  document.getElementById('progress-pct-text').innerText = "100%";
+  document.getElementById('progress-line').style.width = "100%";
+
+  let total = 0;
+  questionsData.forEach(q => {
+    total += (questionScores[q.id] || 0);
+  });
+
+  document.getElementById('final-score-val').innerText = `${total.toFixed(1)} / 20`;
+
+  let evalMsg = "";
+  if (total >= 18) {
+    evalMsg = "Excellence Méthodologique (Rang A) : Maîtrise parfaite de l'ITT, du Per Protocole et des règles de non-infériorité.";
+  } else if (total >= 14) {
+    evalMsg = "Très Bon Niveau : Les concepts fondamentaux sont bien assimilés. Analysez vos discordances ci-dessous pour viser le 20/20.";
+  } else if (total >= 10) {
+    evalMsg = "Niveau Moyen : Des confusions persistent, notamment sur le rôle conservateur de l'ITT face au Per Protocole.";
+  } else {
+    evalMsg = "À retravailler : Une relecture attentive de la fiche s'impose, en ciblant le mécanisme de contamination et le pire scénario.";
+  }
+  document.getElementById('final-eval-msg').innerText = evalMsg;
+
+  const tbody = document.getElementById('final-summary-tbody');
+  tbody.innerHTML = '';
+
+  questionsData.forEach((q, idx) => {
+    const tr = document.createElement('tr');
+    const userAns = (userSelections[q.id] || []).map(i => `P${i+1}`).join(", ") || "Aucune";
+    const trueAns = q.options.map((o, i) => o.isCorrect ? `P${i+1}` : null).filter(Boolean).join(", ");
+    const pts = (questionScores[q.id] || 0).toFixed(1);
+
+    tr.innerHTML = `
+      <td style="text-align:center; font-weight:700;">Q${idx + 1}</td>
+      <td>${q.title.substring(0, 48)}...</td>
+      <td style="text-align:center;">${userAns}</td>
+      <td style="text-align:center; font-weight:700;">${trueAns}</td>
+      <td style="text-align:center; font-weight:700;">${pts} / 2</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const btnAction = document.getElementById('btn-action');
+  btnAction.innerText = 'Recommencer';
+  btnAction.onclick = () => {
+    btnAction.onclick = handleMainAction;
+    initQuiz();
+  };
+
+  document.getElementById('btn-prev').disabled = true;
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+document.addEventListener('DOMContentLoaded', initQuiz);
+</script>
+
+</body>
+</html>
